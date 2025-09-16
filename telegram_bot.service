@@ -1,0 +1,35 @@
+[Unit]
+Description=Telegram Bot Women Club
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/your/bot/directory
+Environment=PATH=/path/to/your/bot/directory/venv/bin
+ExecStart=/path/to/your/bot/directory/venv/bin/python bot_webhook.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Безопасность
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/path/to/your/bot/directory
+
+# Ограничения ресурсов
+LimitNOFILE=65536
+MemoryMax=512M
+
+# Переменные окружения
+Environment=FLASK_HOST=127.0.0.1
+Environment=FLASK_PORT=5000
+Environment=DEBUG=False
+
+[Install]
+WantedBy=multi-user.target

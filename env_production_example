@@ -1,0 +1,35 @@
+# Конфигурация для продакшена
+# Скопируйте этот файл в .env и заполните реальными значениями
+
+# Telegram Bot Configuration
+BOT_TOKEN=your_bot_token_here
+ADMIN_CHAT_ID=your_admin_chat_id_here
+
+# Webhook Configuration
+WEBHOOK_URL=https://yourdomain.com/webhook/telegram
+WEBHOOK_PORT=8443
+WEBHOOK_LISTEN=0.0.0.0
+WEBHOOK_SSL_CERT=/opt/telegram_bot/ssl/cert.pem
+WEBHOOK_SSL_PRIV=/opt/telegram_bot/ssl/private.key
+
+# Server Configuration
+FLASK_HOST=127.0.0.1
+FLASK_PORT=5000
+DEBUG=False
+
+# Продамус Configuration
+PRODAMUS_SHOP_ID=your_shop_id_here
+PRODAMUS_SECRET_KEY=your_secret_key_here
+PRODAMUS_API_URL=https://secure.payform.ru/init_payment
+
+# Канал Configuration
+CHANNEL_ID=your_channel_id_here
+CHANNEL_USERNAME=@your_channel_username
+
+# Database
+DATABASE_PATH=/opt/telegram_bot/women_club.db
+
+# Subscription Settings
+SUBSCRIPTION_PRICE=1500
+SUBSCRIPTION_DURATION_DAYS=30
+REMINDER_DAYS_BEFORE=3

@@ -7,6 +7,18 @@ load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 ADMIN_CHAT_ID = os.getenv('ADMIN_CHAT_ID')  # ID администратора для уведомлений
 
+# Webhook Configuration
+WEBHOOK_URL = os.getenv('WEBHOOK_URL')  # https://yourdomain.com/webhook/telegram
+WEBHOOK_PORT = int(os.getenv('WEBHOOK_PORT', '8443'))
+WEBHOOK_LISTEN = os.getenv('WEBHOOK_LISTEN', '0.0.0.0')
+WEBHOOK_SSL_CERT = os.getenv('WEBHOOK_SSL_CERT', './ssl/cert.pem')
+WEBHOOK_SSL_PRIV = os.getenv('WEBHOOK_SSL_PRIV', './ssl/private.key')
+
+# Server Configuration
+FLASK_HOST = os.getenv('FLASK_HOST', '127.0.0.1')
+FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+
 # Продамус Configuration
 PRODAMUS_SHOP_ID = os.getenv('PRODAMUS_SHOP_ID')
 PRODAMUS_SECRET_KEY = os.getenv('PRODAMUS_SECRET_KEY')
