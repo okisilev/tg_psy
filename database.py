@@ -153,5 +153,29 @@ class Database:
         result = cursor.fetchone()
         return result[0] if result[0] else 0
     
+    def get_users_with_active_subscriptions(self) -> List[Tuple]:
+        """Получить пользователей с активными подписками"""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT s.*, u.username, u.first_name, u.last_name
+            FROM subscriptions s
+            JOIN users u ON s.user_id = u.user_id
+            WHERE s.is_active = 1 AND s.end_date > datetime('now')
+            ORDER BY s.end_date DESC
+        ''')
+        return cursor.fetchall()
+    
+    def get_users_with_expired_subscriptions(self) -> List[Tuple]:
+        """Получить пользователей с истекшими подписками"""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT s.*, u.username, u.first_name, u.last_name
+            FROM subscriptions s
+            JOIN users u ON s.user_id = u.user_id
+            WHERE s.is_active = 1 AND s.end_date <= datetime('now')
+            ORDER BY s.end_date DESC
+        ''')
+        return cursor.fetchall()
+    
     def close(self):
         self.conn.close()

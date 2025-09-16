@@ -54,6 +54,11 @@ class WomenClubBot:
             keyboard = [
                 [InlineKeyboardButton("🔗 Перейти в канал", url=f"https://t.me/{CHANNEL_USERNAME[1:]}")]
             ]
+            
+            # Добавляем кнопку админ-панели для администраторов
+            if str(user_id) == ADMIN_CHAT_ID:
+                keyboard.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
+            
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await update.message.reply_text(
@@ -66,6 +71,11 @@ class WomenClubBot:
             keyboard = [
                 [InlineKeyboardButton("💳 Оплатить подписку", callback_data="pay_subscription")]
             ]
+            
+            # Добавляем кнопку админ-панели для администраторов
+            if str(user_id) == ADMIN_CHAT_ID:
+                keyboard.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
+            
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await update.message.reply_text(
@@ -305,6 +315,74 @@ class WomenClubBot:
             reply_markup=reply_markup
         )
     
+    async def admin_panel_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Обработчик кнопки админ-панели"""
+        query = update.callback_query
+        await query.answer()
+        
+        user_id = query.from_user.id
+        
+        # Проверяем, является ли пользователь администратором
+        if str(user_id) != ADMIN_CHAT_ID:
+            await query.edit_message_text("❌ У вас нет прав доступа к админ-панели.")
+            return
+        
+        keyboard = [
+            [InlineKeyboardButton("📊 Отчет по платежам", callback_data="admin_report")],
+            [InlineKeyboardButton("👥 Пользователи", callback_data="admin_users")],
+            [InlineKeyboardButton("🔄 Проверить подписки", callback_data="admin_check_subscriptions")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.edit_message_text(
+            "🔧 Админ-панель Женского клуба\n\nВыберите действие:",
+            reply_markup=reply_markup
+        )
+    
+    async def main_menu_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Возврат в главное меню"""
+        query = update.callback_query
+        await query.answer()
+        
+        user_id = query.from_user.id
+        
+        # Проверяем активную подписку
+        subscription = self.db.get_active_subscription(user_id)
+        
+        if subscription:
+            # У пользователя есть активная подписка
+            keyboard = [
+                [InlineKeyboardButton("🔗 Перейти в канал", url=f"https://t.me/{CHANNEL_USERNAME[1:]}")]
+            ]
+            
+            # Добавляем кнопку админ-панели для администраторов
+            if str(user_id) == ADMIN_CHAT_ID:
+                keyboard.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
+            
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.edit_message_text(
+                "✅ У вас есть активная подписка на Женский клуб!\n\n"
+                f"Подписка действует до: {subscription[5][:10]}",
+                reply_markup=reply_markup
+            )
+        else:
+            # Предлагаем оформить подписку
+            keyboard = [
+                [InlineKeyboardButton("💳 Оплатить подписку", callback_data="pay_subscription")]
+            ]
+            
+            # Добавляем кнопку админ-панели для администраторов
+            if str(user_id) == ADMIN_CHAT_ID:
+                keyboard.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
+            
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.edit_message_text(
+                MESSAGES['welcome'],
+                reply_markup=reply_markup
+            )
+    
     async def admin_report_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик отчета по платежам"""
         await self.admin_panel.admin_report_callback(update, context)
@@ -318,6 +396,8 @@ class WomenClubBot:
         # Callback handlers
         application.add_handler(CallbackQueryHandler(self.pay_subscription_callback, pattern="^pay_subscription$"))
         application.add_handler(CallbackQueryHandler(self.check_payment_callback, pattern="^check_payment_"))
+        application.add_handler(CallbackQueryHandler(self.admin_panel_callback, pattern="^admin_panel$"))
+        application.add_handler(CallbackQueryHandler(self.main_menu_callback, pattern="^main_menu$"))
         
         # Админ-панель handlers
         self.admin_panel.setup_admin_handlers(application)

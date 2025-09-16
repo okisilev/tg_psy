@@ -72,7 +72,7 @@ class AdminPanel:
             
             keyboard = [
                 [InlineKeyboardButton("📊 Новый отчет", callback_data="admin_report")],
-                [InlineKeyboardButton("🔙 Главное меню", callback_data="admin_back")]
+                [InlineKeyboardButton("🔙 Назад", callback_data="admin_back")]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
@@ -106,6 +106,124 @@ class AdminPanel:
             f"• С истекшей подпиской: {total_users - active_subscriptions}",
             reply_markup=reply_markup
         )
+    
+    async def users_all_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать всех пользователей"""
+        query = update.callback_query
+        await query.answer()
+        
+        try:
+            users = self.db.get_all_users()
+            
+            if not users:
+                message = "👥 Все пользователи\n\n📭 Пользователей не найдено"
+                keyboard = [[InlineKeyboardButton("🔙 Назад", callback_data="admin_users")]]
+            else:
+                message = f"👥 Все пользователи\n\n📊 Всего: {len(users)}\n\n"
+                message += "📋 Список пользователей:\n"
+                
+                for i, user in enumerate(users[:20], 1):  # Показываем первые 20
+                    username = f"@{user[1]}" if user[1] else f"ID:{user[0]}"
+                    first_name = user[2] or ""
+                    last_name = user[3] or ""
+                    name = f"{first_name} {last_name}".strip()
+                    if name:
+                        message += f"{i}. {username} ({name})\n"
+                    else:
+                        message += f"{i}. {username}\n"
+                
+                if len(users) > 20:
+                    message += f"\n... и еще {len(users) - 20} пользователей"
+                
+                keyboard = [
+                    [InlineKeyboardButton("🔙 Назад", callback_data="admin_users")]
+                ]
+            
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(message, reply_markup=reply_markup)
+            
+        except Exception as e:
+            await query.edit_message_text(f"❌ Ошибка получения списка пользователей: {str(e)}")
+    
+    async def users_active_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать пользователей с активной подпиской"""
+        query = update.callback_query
+        await query.answer()
+        
+        try:
+            active_users = self.db.get_users_with_active_subscriptions()
+            
+            if not active_users:
+                message = "✅ Пользователи с активной подпиской\n\n📭 Пользователей с активной подпиской не найдено"
+                keyboard = [[InlineKeyboardButton("🔙 Назад", callback_data="admin_users")]]
+            else:
+                message = f"✅ Пользователи с активной подпиской\n\n📊 Всего: {len(active_users)}\n\n"
+                message += "📋 Список пользователей:\n"
+                
+                for i, user in enumerate(active_users[:20], 1):  # Показываем первые 20
+                    username = f"@{user[1]}" if user[1] else f"ID:{user[0]}"
+                    first_name = user[2] or ""
+                    last_name = user[3] or ""
+                    name = f"{first_name} {last_name}".strip()
+                    expiry_date = user[5][:10] if user[5] else "Не указано"
+                    
+                    if name:
+                        message += f"{i}. {username} ({name}) - до {expiry_date}\n"
+                    else:
+                        message += f"{i}. {username} - до {expiry_date}\n"
+                
+                if len(active_users) > 20:
+                    message += f"\n... и еще {len(active_users) - 20} пользователей"
+                
+                keyboard = [
+                    [InlineKeyboardButton("🔙 Назад", callback_data="admin_users")]
+                ]
+            
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(message, reply_markup=reply_markup)
+            
+        except Exception as e:
+            await query.edit_message_text(f"❌ Ошибка получения списка пользователей: {str(e)}")
+    
+    async def users_expired_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Показать пользователей с истекшей подпиской"""
+        query = update.callback_query
+        await query.answer()
+        
+        try:
+            expired_users = self.db.get_users_with_expired_subscriptions()
+            
+            if not expired_users:
+                message = "❌ Пользователи с истекшей подпиской\n\n📭 Пользователей с истекшей подпиской не найдено"
+                keyboard = [[InlineKeyboardButton("🔙 Назад", callback_data="admin_users")]]
+            else:
+                message = f"❌ Пользователи с истекшей подпиской\n\n📊 Всего: {len(expired_users)}\n\n"
+                message += "📋 Список пользователей:\n"
+                
+                for i, user in enumerate(expired_users[:20], 1):  # Показываем первые 20
+                    username = f"@{user[1]}" if user[1] else f"ID:{user[0]}"
+                    first_name = user[2] or ""
+                    last_name = user[3] or ""
+                    name = f"{first_name} {last_name}".strip()
+                    expiry_date = user[5][:10] if user[5] else "Не указано"
+                    
+                    if name:
+                        message += f"{i}. {username} ({name}) - истекла {expiry_date}\n"
+                    else:
+                        message += f"{i}. {username} - истекла {expiry_date}\n"
+                
+                if len(expired_users) > 20:
+                    message += f"\n... и еще {len(expired_users) - 20} пользователей"
+                
+                keyboard = [
+                    [InlineKeyboardButton("🔙 Назад", callback_data="admin_users")]
+                ]
+            
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.edit_message_text(message, reply_markup=reply_markup)
+            
+        except Exception as e:
+            await query.edit_message_text(f"❌ Ошибка получения списка пользователей: {str(e)}")
     
     async def admin_check_subscriptions_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Проверка подписок"""
@@ -150,7 +268,8 @@ class AdminPanel:
         keyboard = [
             [InlineKeyboardButton("📊 Отчет по платежам", callback_data="admin_report")],
             [InlineKeyboardButton("👥 Пользователи", callback_data="admin_users")],
-            [InlineKeyboardButton("🔄 Проверить подписки", callback_data="admin_check_subscriptions")]
+            [InlineKeyboardButton("🔄 Проверить подписки", callback_data="admin_check_subscriptions")],
+            [InlineKeyboardButton("🏠 Главное меню", callback_data="main_menu")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
@@ -169,6 +288,9 @@ class AdminPanel:
         
         # Пользователи
         application.add_handler(CallbackQueryHandler(self.admin_users_callback, pattern="^admin_users$"))
+        application.add_handler(CallbackQueryHandler(self.users_all_callback, pattern="^users_all$"))
+        application.add_handler(CallbackQueryHandler(self.users_active_callback, pattern="^users_active$"))
+        application.add_handler(CallbackQueryHandler(self.users_expired_callback, pattern="^users_expired$"))
         application.add_handler(CallbackQueryHandler(self.admin_check_subscriptions_callback, pattern="^admin_check_subscriptions$"))
         
         # Навигация
