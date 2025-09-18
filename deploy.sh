@@ -12,9 +12,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Конфигурация
-BOT_DIR="/opt/telegram_bot"
-SERVICE_NAME="telegram_bot"
-NGINX_SITE="telegram_bot"
+BOT_DIR="/usr/TG_BOTs/tg_psy"
+SERVICE_NAME="tg_psy"
+NGINX_SITE="tg_psy"
 
 echo -e "${GREEN}🚀 Начинаем деплой Telegram бота...${NC}"
 

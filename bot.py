@@ -9,14 +9,15 @@ from telegram.error import TelegramError
 from telegram.constants import ParseMode
 
 from config import (
-    BOT_TOKEN, ADMIN_CHAT_ID, CHANNEL_ID, CHANNEL_USERNAME,
-    MESSAGES, SUBSCRIPTION_PRICE
+    BOT_TOKEN, ADMIN_CHAT_ID, CHANNEL_ID, CHANNEL_USERNAME, CHANNEL_INVITE_LINK,
+    WHATSAPP_NUMBER, MESSAGES, SUBSCRIPTION_PRICE
 )
 from database import Database
 from prodamus import ProdаmusAPI
 from scheduler import SubscriptionScheduler
 from admin_panel import AdminPanel
 from channel_manager import ChannelManager
+from admin_auth import AdminAuth
 
 # Настройка логирования
 logging.basicConfig(
@@ -32,6 +33,7 @@ class WomenClubBot:
         self.scheduler = SubscriptionScheduler(self)
         self.admin_panel = AdminPanel(self)
         self.channel_manager = ChannelManager()
+        self.admin_auth = AdminAuth(self.db)
         
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик команды /start"""
@@ -52,11 +54,12 @@ class WomenClubBot:
         if subscription:
             # У пользователя есть активная подписка
             keyboard = [
-                [InlineKeyboardButton("🔗 Перейти в канал", url=f"https://t.me/{CHANNEL_USERNAME[1:]}")]
+                [InlineKeyboardButton("🔗 Перейти в канал", url=CHANNEL_INVITE_LINK)],
+                [InlineKeyboardButton("💬 Индивидуальная консультация", callback_data="consultation")]
             ]
             
             # Добавляем кнопку админ-панели для администраторов
-            if str(user_id) == ADMIN_CHAT_ID:
+            if self.admin_auth.is_admin(user_id):
                 keyboard.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
             
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -69,11 +72,12 @@ class WomenClubBot:
         else:
             # Предлагаем оформить подписку
             keyboard = [
-                [InlineKeyboardButton("💳 Оплатить подписку", callback_data="pay_subscription")]
+                [InlineKeyboardButton("💳 Оплатить подписку", callback_data="pay_subscription")],
+                [InlineKeyboardButton("💬 Индивидуальная консультация", callback_data="consultation")]
             ]
             
             # Добавляем кнопку админ-панели для администраторов
-            if str(user_id) == ADMIN_CHAT_ID:
+            if self.admin_auth.is_admin(user_id):
                 keyboard.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
             
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -172,7 +176,8 @@ class WomenClubBot:
             
             # Уведомляем пользователя
             keyboard = [
-                [InlineKeyboardButton("🔗 Перейти в канал", url=f"https://t.me/{CHANNEL_USERNAME[1:]}")]
+                [InlineKeyboardButton("🔗 Перейти в канал", url=CHANNEL_INVITE_LINK)],
+                [InlineKeyboardButton("💬 Индивидуальная консультация", callback_data="consultation")]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
@@ -299,14 +304,15 @@ class WomenClubBot:
         user_id = update.effective_user.id
         
         # Проверяем, является ли пользователь администратором
-        if str(user_id) != ADMIN_CHAT_ID:
+        if not self.admin_auth.is_admin(user_id):
             await update.message.reply_text("❌ У вас нет прав доступа к админ-панели.")
             return
         
         keyboard = [
             [InlineKeyboardButton("📊 Отчет по платежам", callback_data="admin_report")],
             [InlineKeyboardButton("👥 Пользователи", callback_data="admin_users")],
-            [InlineKeyboardButton("🔄 Проверить подписки", callback_data="admin_check_subscriptions")]
+            [InlineKeyboardButton("🔄 Проверить подписки", callback_data="admin_check_subscriptions")],
+            [InlineKeyboardButton("👑 Администраторы", callback_data="admin_manage_admins")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
@@ -323,14 +329,15 @@ class WomenClubBot:
         user_id = query.from_user.id
         
         # Проверяем, является ли пользователь администратором
-        if str(user_id) != ADMIN_CHAT_ID:
+        if not self.admin_auth.is_admin(user_id):
             await query.edit_message_text("❌ У вас нет прав доступа к админ-панели.")
             return
         
         keyboard = [
             [InlineKeyboardButton("📊 Отчет по платежам", callback_data="admin_report")],
             [InlineKeyboardButton("👥 Пользователи", callback_data="admin_users")],
-            [InlineKeyboardButton("🔄 Проверить подписки", callback_data="admin_check_subscriptions")]
+            [InlineKeyboardButton("🔄 Проверить подписки", callback_data="admin_check_subscriptions")],
+            [InlineKeyboardButton("👑 Администраторы", callback_data="admin_manage_admins")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
@@ -352,11 +359,12 @@ class WomenClubBot:
         if subscription:
             # У пользователя есть активная подписка
             keyboard = [
-                [InlineKeyboardButton("🔗 Перейти в канал", url=f"https://t.me/{CHANNEL_USERNAME[1:]}")]
+                [InlineKeyboardButton("🔗 Перейти в канал", url=CHANNEL_INVITE_LINK)],
+                [InlineKeyboardButton("💬 Индивидуальная консультация", callback_data="consultation")]
             ]
             
             # Добавляем кнопку админ-панели для администраторов
-            if str(user_id) == ADMIN_CHAT_ID:
+            if self.admin_auth.is_admin(user_id):
                 keyboard.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
             
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -369,11 +377,12 @@ class WomenClubBot:
         else:
             # Предлагаем оформить подписку
             keyboard = [
-                [InlineKeyboardButton("💳 Оплатить подписку", callback_data="pay_subscription")]
+                [InlineKeyboardButton("💳 Оплатить подписку", callback_data="pay_subscription")],
+                [InlineKeyboardButton("💬 Индивидуальная консультация", callback_data="consultation")]
             ]
             
             # Добавляем кнопку админ-панели для администраторов
-            if str(user_id) == ADMIN_CHAT_ID:
+            if self.admin_auth.is_admin(user_id):
                 keyboard.append([InlineKeyboardButton("🔧 Админ-панель", callback_data="admin_panel")])
             
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -387,6 +396,80 @@ class WomenClubBot:
         """Обработчик отчета по платежам"""
         await self.admin_panel.admin_report_callback(update, context)
     
+    async def consultation_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Обработчик кнопки индивидуальной консультации"""
+        query = update.callback_query
+        await query.answer()
+        
+        # Формируем сообщение с информацией о консультации
+        message = MESSAGES['consultation_info'].format(whatsapp_number=WHATSAPP_NUMBER)
+        
+        # Создаем кнопку для перехода в WhatsApp
+        whatsapp_url = f"https://wa.me/{WHATSAPP_NUMBER.replace('+', '')}"
+        keyboard = [
+            [InlineKeyboardButton("💬 Перейти в WhatsApp", url=whatsapp_url)],
+            [InlineKeyboardButton("🔙 Главное меню", callback_data="main_menu")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.edit_message_text(message, reply_markup=reply_markup)
+    
+    async def handle_admin_id_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Обработка сообщения с ID администратора"""
+        user_id = update.effective_user.id
+        
+        # Проверяем, ожидаем ли мы ID администратора
+        if not context.user_data.get('waiting_for_admin_id', False):
+            return
+        
+        # Проверяем права супер-администратора
+        if not self.admin_auth.can_manage_admins(user_id):
+            await update.message.reply_text("❌ У вас нет прав для добавления администраторов.")
+            context.user_data['waiting_for_admin_id'] = False
+            return
+        
+        try:
+            # Парсим ID пользователя
+            admin_id_text = update.message.text.strip()
+            admin_id = int(admin_id_text)
+            
+            # Проверяем, не является ли пользователь уже администратором
+            if self.admin_auth.is_admin(admin_id):
+                await update.message.reply_text("❌ Этот пользователь уже является администратором.")
+                context.user_data['waiting_for_admin_id'] = False
+                return
+            
+            # Получаем информацию о пользователе из базы или создаем запись
+            user_info = self.db.get_user(admin_id)
+            if not user_info:
+                # Если пользователя нет в базе, создаем базовую запись
+                self.db.add_user(admin_id)
+                user_info = self.db.get_user(admin_id)
+            
+            # Добавляем администратора
+            success = self.admin_auth.add_admin(
+                user_id=admin_id,
+                username=user_info[1] if user_info else None,
+                first_name=user_info[2] if user_info else None,
+                last_name=user_info[3] if user_info else None,
+                role='admin',
+                added_by=user_id
+            )
+            
+            if success:
+                username = f"@{user_info[1]}" if user_info and user_info[1] else f"ID:{admin_id}"
+                await update.message.reply_text(f"✅ Пользователь {username} успешно добавлен как администратор.")
+            else:
+                await update.message.reply_text("❌ Не удалось добавить администратора.")
+            
+            context.user_data['waiting_for_admin_id'] = False
+            
+        except ValueError:
+            await update.message.reply_text("❌ Неверный формат ID. Пожалуйста, отправьте числовой ID пользователя.")
+        except Exception as e:
+            await update.message.reply_text(f"❌ Ошибка добавления администратора: {str(e)}")
+            context.user_data['waiting_for_admin_id'] = False
+    
     def setup_handlers(self, application: Application):
         """Настройка обработчиков команд"""
         # Команды
@@ -398,6 +481,10 @@ class WomenClubBot:
         application.add_handler(CallbackQueryHandler(self.check_payment_callback, pattern="^check_payment_"))
         application.add_handler(CallbackQueryHandler(self.admin_panel_callback, pattern="^admin_panel$"))
         application.add_handler(CallbackQueryHandler(self.main_menu_callback, pattern="^main_menu$"))
+        application.add_handler(CallbackQueryHandler(self.consultation_callback, pattern="^consultation$"))
+        
+        # Message handlers
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_admin_id_message))
         
         # Админ-панель handlers
         self.admin_panel.setup_admin_handlers(application)

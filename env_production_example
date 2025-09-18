@@ -27,7 +27,7 @@ CHANNEL_ID=your_channel_id_here
 CHANNEL_USERNAME=@your_channel_username
 
 # Database
-DATABASE_PATH=/opt/telegram_bot/women_club.db
+DATABASE_PATH=/usr/TG_BOTs/tg_psy/women_club.db
 
 # Subscription Settings
 SUBSCRIPTION_PRICE=1500

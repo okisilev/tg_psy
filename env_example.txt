@@ -1,6 +1,7 @@
 # Telegram Bot Configuration
 BOT_TOKEN=your_bot_token_here
-ADMIN_CHAT_ID=your_admin_chat_id_here
+ADMIN_CHAT_ID=your_main_admin_chat_id_here
+ADMIN_IDS=admin_id_1,admin_id_2,admin_id_3
 
 # Продамус Configuration
 PRODAMUS_SHOP_ID=your_shop_id_here
@@ -8,8 +9,12 @@ PRODAMUS_SECRET_KEY=your_secret_key_here
 PRODAMUS_API_URL=https://secure.payform.ru/init_payment
 
 # Канал Configuration
-CHANNEL_ID=your_channel_id_here
+CHANNEL_ID=-1001234567890  # ID вашего канала (с минусом!)
 CHANNEL_USERNAME=@your_channel_username
+CHANNEL_INVITE_LINK=https://t.me/+gstVWYW2Kgo2OGYy  # Ссылка-приглашение в канал
+
+# WhatsApp Configuration
+WHATSAPP_NUMBER=+79149425115  # Номер WhatsApp для консультаций
 
 # Webhook Configuration (для получения уведомлений от Продамус)
 WEBHOOK_URL=https://yourdomain.com/webhook/prodamus
