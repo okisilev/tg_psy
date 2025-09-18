@@ -1,7 +1,11 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# Попытка загрузить переменные из .env файла
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    print("⚠️ python-dotenv не установлен. Используются переменные окружения системы.")
 
 # Telegram Bot Configuration
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -16,7 +20,7 @@ WEBHOOK_SSL_CERT = os.getenv('WEBHOOK_SSL_CERT', './ssl/cert.pem')
 WEBHOOK_SSL_PRIV = os.getenv('WEBHOOK_SSL_PRIV', './ssl/private.key')
 
 # Server Configuration
-FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0.')
+FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
 FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
