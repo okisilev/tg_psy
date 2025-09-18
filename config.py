@@ -16,7 +16,7 @@ WEBHOOK_SSL_CERT = os.getenv('WEBHOOK_SSL_CERT', './ssl/cert.pem')
 WEBHOOK_SSL_PRIV = os.getenv('WEBHOOK_SSL_PRIV', './ssl/private.key')
 
 # Server Configuration
-FLASK_HOST = os.getenv('FLASK_HOST', '127.0.0.1')
+FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0.')
 FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
