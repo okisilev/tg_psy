@@ -21,9 +21,10 @@ FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 # Продамус Configuration
-PRODAMUS_SHOP_ID = os.getenv('PRODAMUS_SHOP_ID')
-PRODAMUS_SECRET_KEY = os.getenv('PRODAMUS_SECRET_KEY')
-PRODAMUS_API_URL = os.getenv('PRODAMUS_API_URL', 'https://secure.payform.ru/init_payment')
+PRODAMUS_SHOP_ID = os.getenv('PRODAMUS_SHOP_ID', 'dashastar')  # Shop ID из URL dashastar.payform.ru
+PRODAMUS_SECRET_KEY = os.getenv('PRODAMUS_SECRET_KEY', 'b2f9e8a399225271521dfe88a277a7371cb8c2cebfeaa6f0276ba81fcc303c93')
+PRODAMUS_API_URL = os.getenv('PRODAMUS_API_URL', 'https://dashastar.payform.ru/init_payment')
+PRODAMUS_DEMO_MODE = os.getenv('PRODAMUS_DEMO_MODE', 'true').lower() == 'true'  # Включаем демо-режим по умолчанию
 
 # Канал Configuration
 CHANNEL_ID = os.getenv('CHANNEL_ID', '-1001234567890')  # ID закрытого канала (замените на реальный ID)

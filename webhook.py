@@ -61,6 +61,9 @@ def handle_successful_payment(order_id: str, amount: int, webhook_data: dict):
         # Извлекаем user_id из custom_fields
         custom_fields = webhook_data.get('custom_fields', {})
         user_id = int(custom_fields.get('user_id'))
+        username = custom_fields.get('username', '')
+        
+        logger.info(f"Обработка успешного платежа: user_id={user_id}, order_id={order_id}, amount={amount}")
         
         # Обновляем статус платежа в базе данных
         db.add_payment(user_id, order_id, amount, 'success')
@@ -72,9 +75,17 @@ def handle_successful_payment(order_id: str, amount: int, webhook_data: dict):
         user = db.get_user(user_id)
         subscription = db.get_active_subscription(user_id)
         
-        logger.info(f"Подписка активирована для пользователя {user_id}")
+        logger.info(f"Подписка активирована для пользователя {user_id} (username: {username})")
         
-        # Здесь должна быть логика уведомления пользователя и администратора
+        # Уведомляем администратора о новом платеже
+        try:
+            from bot import WomenClubBot
+            bot = WomenClubBot()
+            bot.notify_admin_payment(user_id, username, amount, subscription.expires_at if subscription else None)
+        except Exception as e:
+            logger.error(f"Ошибка уведомления администратора: {e}")
+        
+        # Здесь должна быть логика уведомления пользователя через бота
         # В реальном проекте это делается через бота
         
     except Exception as e:
