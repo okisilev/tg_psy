@@ -8,6 +8,7 @@ from config import (
     PRODAMUS_SHOP_ID, 
     PRODAMUS_SECRET_KEY, 
     PRODAMUS_API_URL,
+    PRODAMUS_DEMO_MODE,
     SUBSCRIPTION_PRICE
 )
 
@@ -16,6 +17,7 @@ class ProdаmusAPI:
         self.shop_id = PRODAMUS_SHOP_ID
         self.secret_key = PRODAMUS_SECRET_KEY
         self.api_url = PRODAMUS_API_URL
+        self.demo_mode = PRODAMUS_DEMO_MODE
     
     def generate_signature(self, data: str) -> str:
         """Генерация подписи для запроса к Продамус"""
@@ -38,18 +40,28 @@ class ProdаmusAPI:
                 'description': 'Подписка на Женский клуб на 1 месяц',
                 'success_url': 'https://t.me/your_bot_username',  # URL после успешной оплаты
                 'fail_url': 'https://t.me/your_bot_username',     # URL после неуспешной оплаты
-                'callback_url': 'https://yourdomain.com/webhook',  # Webhook для уведомлений
+                'callback_url': 'https://yourdomain.com/webhook/prodamus',  # Webhook для уведомлений
                 'custom_fields': {
                     'user_id': user_id,
                     'username': username or ''
                 }
             }
             
+            # Добавляем демо-режим если включен
+            if self.demo_mode:
+                payment_data['demo_mode'] = 1
+            
             # Создаем строку для подписи
             sign_string = f"{payment_data['shop_id']}{payment_data['amount']}{payment_data['order_id']}{payment_data['currency']}{self.secret_key}"
             payment_data['signature'] = self.generate_signature(sign_string)
             
+            print(f"Отправка запроса к: {self.api_url}")
+            print(f"Данные: {payment_data}")
+            
             response = requests.post(self.api_url, json=payment_data, timeout=30)
+            
+            print(f"Статус ответа: {response.status_code}")
+            print(f"Ответ: {response.text}")
             
             if response.status_code == 200:
                 result = response.json()
@@ -59,6 +71,8 @@ class ProdаmusAPI:
                         'payment_url': result.get('payment_url'),
                         'amount': payment_data['amount']
                     }
+                else:
+                    print(f"API вернул ошибку: {result}")
             
             return None
             
@@ -98,3 +112,49 @@ class ProdаmusAPI:
         except Exception as e:
             print(f"Ошибка получения статуса платежа: {e}")
             return None
+    
+    def set_activity(self, order_id: str, activity: str) -> bool:
+        """Установка активности заказа (setactivity API)"""
+        try:
+            url = "https://secure.payform.ru/setactivity"
+            data = {
+                'shop_id': self.shop_id,
+                'order_id': order_id,
+                'activity': activity,
+                'signature': self.generate_signature(f"{self.shop_id}{order_id}{activity}{self.secret_key}")
+            }
+            
+            response = requests.post(url, json=data, timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result.get('status') == 'success'
+            
+            return False
+            
+        except Exception as e:
+            print(f"Ошибка установки активности: {e}")
+            return False
+    
+    def set_subscription_payment_date(self, order_id: str, payment_date: str) -> bool:
+        """Установка даты платежа для подписки (setsubscriptionpaymentdate API)"""
+        try:
+            url = "https://secure.payform.ru/setsubscriptionpaymentdate"
+            data = {
+                'shop_id': self.shop_id,
+                'order_id': order_id,
+                'payment_date': payment_date,
+                'signature': self.generate_signature(f"{self.shop_id}{order_id}{payment_date}{self.secret_key}")
+            }
+            
+            response = requests.post(url, json=data, timeout=30)
+            
+            if response.status_code == 200:
+                result = response.json()
+                return result.get('status') == 'success'
+            
+            return False
+            
+        except Exception as e:
+            print(f"Ошибка установки даты платежа подписки: {e}")
+            return False

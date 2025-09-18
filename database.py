@@ -50,6 +50,22 @@ class Database:
             )
         ''')
         
+        # Таблица администраторов
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS admins (
+                user_id INTEGER PRIMARY KEY,
+                username TEXT,
+                first_name TEXT,
+                last_name TEXT,
+                role TEXT DEFAULT 'admin',
+                added_by INTEGER,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                is_active BOOLEAN DEFAULT 1,
+                FOREIGN KEY (user_id) REFERENCES users (user_id),
+                FOREIGN KEY (added_by) REFERENCES admins (user_id)
+            )
+        ''')
+        
         self.conn.commit()
     
     def add_user(self, user_id: int, username: str = None, first_name: str = None, last_name: str = None):
@@ -176,6 +192,58 @@ class Database:
             ORDER BY s.end_date DESC
         ''')
         return cursor.fetchall()
+    
+    def is_admin(self, user_id: int) -> bool:
+        """Проверить, является ли пользователь администратором"""
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT is_active FROM admins WHERE user_id = ?', (user_id,))
+        result = cursor.fetchone()
+        return result is not None and result[0] == 1
+    
+    def add_admin(self, user_id: int, username: str = None, first_name: str = None, 
+                  last_name: str = None, role: str = 'admin', added_by: int = None):
+        """Добавить администратора"""
+        cursor = self.conn.cursor()
+        
+        # Сначала добавляем пользователя в таблицу users, если его там нет
+        self.add_user(user_id, username, first_name, last_name)
+        
+        # Добавляем в таблицу администраторов
+        cursor.execute('''
+            INSERT OR REPLACE INTO admins (user_id, username, first_name, last_name, role, added_by, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, 1)
+        ''', (user_id, username, first_name, last_name, role, added_by))
+        
+        self.conn.commit()
+        return cursor.lastrowid
+    
+    def remove_admin(self, user_id: int):
+        """Удалить администратора (деактивировать)"""
+        cursor = self.conn.cursor()
+        cursor.execute('UPDATE admins SET is_active = 0 WHERE user_id = ?', (user_id,))
+        self.conn.commit()
+    
+    def get_all_admins(self) -> List[Tuple]:
+        """Получить всех активных администраторов"""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT * FROM admins 
+            WHERE is_active = 1 
+            ORDER BY added_at DESC
+        ''')
+        return cursor.fetchall()
+    
+    def get_admin_info(self, user_id: int) -> Optional[Tuple]:
+        """Получить информацию об администраторе"""
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT * FROM admins WHERE user_id = ? AND is_active = 1', (user_id,))
+        return cursor.fetchone()
+    
+    def update_admin_role(self, user_id: int, role: str):
+        """Обновить роль администратора"""
+        cursor = self.conn.cursor()
+        cursor.execute('UPDATE admins SET role = ? WHERE user_id = ?', (role, user_id))
+        self.conn.commit()
     
     def close(self):
         self.conn.close()
