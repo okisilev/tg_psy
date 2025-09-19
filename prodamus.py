@@ -9,6 +9,7 @@ from config import (
     PRODAMUS_SECRET_KEY, 
     PRODAMUS_API_URL,
     PRODAMUS_DEMO_MODE,
+    PRODAMUS_WEBHOOK_URL,
     SUBSCRIPTION_PRICE
 )
 
@@ -41,9 +42,9 @@ class ProdаmusAPI:
                 'customer_phone': '',
                 'customer_email': '',
                 'description': 'Подписка на Женский клуб на 1 месяц',
-                'success_url': 'https://t.me/your_bot_username',
-                'fail_url': 'https://t.me/your_bot_username',
-                'callback_url': 'https://yourdomain.com/webhook/prodamus',
+                'success_url': 'https://t.me/your_bot_username',  # Замените на реальный username бота
+                'fail_url': 'https://t.me/your_bot_username',     # Замените на реальный username бота
+                'callback_url': PRODAMUS_WEBHOOK_URL,  # URL для webhook уведомлений
                 'custom_fields': f'user_id:{user_id},username:{username or ""}'
             }
             
