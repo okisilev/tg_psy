@@ -44,14 +44,14 @@ python3 webhook.py
 - **Shop ID**: `dashastar`
 - **Secret Key**: `b2f9e8a399225271521dfe88a277a7371cb8c2cebfeaa6f0276ba81fcc303c93`
 - **Demo Mode**: Включен
-- **Webhook URL**: `https://yourdomain.com/webhook/prodamus`
+- **Webhook URL**: `https://--help/webhook/prodamus`
 
 ### Переменные окружения:
 ```bash
 export PRODAMUS_SHOP_ID=dashastar
 export PRODAMUS_SECRET_KEY=b2f9e8a399225271521dfe88a277a7371cb8c2cebfeaa6f0276ba81fcc303c93
 export PRODAMUS_DEMO_MODE=true
-export WEBHOOK_URL=https://yourdomain.com/webhook/prodamus
+export WEBHOOK_URL=https://--help/webhook/prodamus
 ```
 
 ## 🧪 Тестирование

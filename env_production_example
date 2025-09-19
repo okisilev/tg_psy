@@ -6,7 +6,7 @@ BOT_TOKEN=your_bot_token_here
 ADMIN_CHAT_ID=your_admin_chat_id_here
 
 # Webhook Configuration
-WEBHOOK_URL=https://yourdomain.com/webhook/telegram
+WEBHOOK_URL=https://--help/webhook/telegram
 WEBHOOK_PORT=8443
 WEBHOOK_LISTEN=0.0.0.0
 WEBHOOK_SSL_CERT=/opt/telegram_bot/ssl/cert.pem

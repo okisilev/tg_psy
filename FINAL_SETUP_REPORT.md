@@ -42,8 +42,8 @@ export CHANNEL_INVITE_LINK="https://t.me/+gstVWYW2Kgo2OGYy"  # → Реальн�
 ### 2. Реальный домен
 ```bash
 # ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ДОМЕН:
-export WEBHOOK_URL="https://yourdomain.com/webhook/telegram"  # → Ваш домен
-export PRODAMUS_WEBHOOK_URL="https://yourdomain.com/webhook/prodamus"  # → Ваш домен
+export WEBHOOK_URL="https://--help/webhook/telegram"  # → Ваш домен
+export PRODAMUS_WEBHOOK_URL="https://--help/webhook/prodamus"  # → Ваш домен
 ```
 
 ### 3. SSL сертификат

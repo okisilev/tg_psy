@@ -45,7 +45,7 @@
 PRODAMUS_SHOP_ID=dashastar
 PRODAMUS_SECRET_KEY=b2f9e8a399225271521dfe88a277a7371cb8c2cebfeaa6f0276ba81fcc303c93
 PRODAMUS_DEMO_MODE=true
-WEBHOOK_URL=https://yourdomain.com/webhook/prodamus
+WEBHOOK_URL=https://--help/webhook/prodamus
 ```
 
 ### Тестовые карты для демо-режима:
@@ -76,7 +76,7 @@ python3 install_dependencies.py
 
 ### 1. Настройка в панели Prodamus:
 - Войти в панель управления Prodamus
-- Настроить webhook URL: `https://yourdomain.com/webhook/prodamus`
+- Настроить webhook URL: `https://--help/webhook/prodamus`
 - Включить демо-режим для тестирования
 - Проверить настройки безопасности
 

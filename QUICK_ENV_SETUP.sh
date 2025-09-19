@@ -17,10 +17,10 @@ export CHANNEL_INVITE_LINK="https://t.me/+gstVWYW2Kgo2OGYy"  # ⚠️ ЗАМЕН
 export PRODAMUS_SHOP_ID="dashastar"
 export PRODAMUS_SECRET_KEY="b2f9e8a399225271521dfe88a277a7371cb8c2cebfeaa6f0276ba81fcc303c93"
 export PRODAMUS_DEMO_MODE="true"
-export PRODAMUS_WEBHOOK_URL="https://yourdomain.com/webhook/prodamus"  # ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ДОМЕН
+export PRODAMUS_WEBHOOK_URL="https://--help/webhook/prodamus"  # ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ДОМЕН
 
 # Webhook Configuration
-export WEBHOOK_URL="https://yourdomain.com/webhook/telegram"  # ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ДОМЕН
+export WEBHOOK_URL="https://--help/webhook/telegram"  # ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЙ ДОМЕН
 export FLASK_HOST="0.0.0.0"
 export FLASK_PORT="5000"
 export DEBUG="false"
@@ -31,7 +31,7 @@ echo "⚠️ ВАЖНО: Замените следующие значения н
 echo "   - CHANNEL_ID: -1001234567890 → Реальный ID канала"
 echo "   - CHANNEL_USERNAME: @your_channel_username → Реальный username"
 echo "   - CHANNEL_INVITE_LINK: https://t.me/+gstVWYW2Kgo2OGYy → Реальная ссылка"
-echo "   - yourdomain.com → Ваш реальный домен"
+echo "   - --help → Ваш реальный домен"
 echo ""
 echo "🔍 Проверка конфигурации:"
 python3 check_config.py

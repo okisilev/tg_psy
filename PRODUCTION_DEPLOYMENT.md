@@ -51,7 +51,7 @@ sudo nano .env
 Заполните все необходимые переменные:
 - `BOT_TOKEN` - токен вашего бота от @BotFather
 - `ADMIN_CHAT_ID` - ваш Telegram ID
-- `WEBHOOK_URL` - https://yourdomain.com/webhook/telegram
+- `WEBHOOK_URL` - https://--help/webhook/telegram
 - `PRODAMUS_SHOP_ID` и `PRODAMUS_SECRET_KEY` - данные от Продамус
 - `CHANNEL_ID` и `CHANNEL_USERNAME` - данные вашего канала
 
@@ -59,7 +59,7 @@ sudo nano .env
 
 ```bash
 # Получаем SSL сертификат от Let's Encrypt
-sudo certbot --nginx -d yourdomain.com
+sudo certbot --nginx -d --help
 
 # Автообновление сертификатов
 sudo crontab -e
@@ -75,7 +75,7 @@ sudo cp nginx_config.conf /etc/nginx/sites-available/telegram_bot
 
 # Редактируем домен в конфигурации
 sudo nano /etc/nginx/sites-available/telegram_bot
-# Замените yourdomain.com на ваш реальный домен
+# Замените --help на ваш реальный домен
 
 # Активируем сайт
 sudo ln -s /etc/nginx/sites-available/telegram_bot /etc/nginx/sites-enabled/
@@ -128,12 +128,12 @@ sudo ./bot_manager.sh backup
 
 ### Health Check
 ```bash
-curl https://yourdomain.com/health
+curl https://--help/health
 ```
 
 ### Статус бота
 ```bash
-curl https://yourdomain.com/status
+curl https://--help/status
 ```
 
 ### Логи в реальном времени

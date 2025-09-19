@@ -38,7 +38,7 @@
 1. Зарегистрируйтесь на сайте Продамус
 2. Создайте магазин
 3. Получите Shop ID и Secret Key
-4. Настройте webhook URL: `https://yourdomain.com/webhook/prodamus`
+4. Настройте webhook URL: `https://--help/webhook/prodamus`
 
 ### 5. Настройте файл .env
 
@@ -65,7 +65,7 @@ CHANNEL_ID=-1001234567890  # ID вашего канала (с минусом!)
 CHANNEL_USERNAME=@your_channel_username
 
 # Webhook Configuration
-WEBHOOK_URL=https://yourdomain.com/webhook/prodamus
+WEBHOOK_URL=https://--help/webhook/prodamus
 ```
 
 ### 6. Получите свой Telegram ID

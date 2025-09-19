@@ -49,7 +49,7 @@ python3 start_webhook.py
 ## 🔗 Пример созданного URL платежа
 
 ```
-https://dashastar.payform.ru/?shop_id=dashastar&amount=1500&currency=RUB&order_id=women_club_431292182_1758249074&description=Подписка на Женский клуб на 1 месяц&success_url=https://t.me/your_bot_username&fail_url=https://t.me/your_bot_username&callback_url=https://yourdomain.com/webhook/prodamus&custom_fields=user_id:431292182,username:Fun_Oleg&demo_mode=1&signature=725579d997d9816a9d8d7c36d6479127c40e05a70a950e9df648591da31017fd
+https://dashastar.payform.ru/?shop_id=dashastar&amount=1500&currency=RUB&order_id=women_club_431292182_1758249074&description=Подписка на Женский клуб на 1 месяц&success_url=https://t.me/your_bot_username&fail_url=https://t.me/your_bot_username&callback_url=https://--help/webhook/prodamus&custom_fields=user_id:431292182,username:Fun_Oleg&demo_mode=1&signature=725579d997d9816a9d8d7c36d6479127c40e05a70a950e9df648591da31017fd
 ```
 
 ## 🧪 Тестовые карты

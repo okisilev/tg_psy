@@ -70,7 +70,7 @@ def test_webhook_config():
     
     try:
         # Проверяем конфигурацию webhook
-        webhook_url = os.getenv('WEBHOOK_URL', 'https://yourdomain.com/webhook/prodamus')
+        webhook_url = os.getenv('WEBHOOK_URL', 'https://--help/webhook/prodamus')
         flask_host = os.getenv('FLASK_HOST', '0.0.0.0')
         flask_port = int(os.getenv('FLASK_PORT', '5000'))
         

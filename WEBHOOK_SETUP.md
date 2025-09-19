@@ -28,10 +28,10 @@ export PRODAMUS_DEMO_MODE="true"
 ### 3. Webhook URLs (ВАЖНО!)
 ```bash
 # URL для Telegram webhook
-export WEBHOOK_URL="https://yourdomain.com/webhook/telegram"
+export WEBHOOK_URL="https://--help/webhook/telegram"
 
 # URL для Prodamus webhook
-export PRODAMUS_WEBHOOK_URL="https://yourdomain.com/webhook/prodamus"
+export PRODAMUS_WEBHOOK_URL="https://--help/webhook/prodamus"
 ```
 
 ### 4. Server Configuration
@@ -45,14 +45,14 @@ export DEBUG="false"
 ## 🌐 Настройка домена и SSL
 
 ### 1. Получение домена
-- Зарегистрируйте домен (например, `yourdomain.com`)
+- Зарегистрируйте домен (например, `--help`)
 - Настройте DNS записи для вашего сервера
 
 ### 2. Настройка SSL сертификата
 ```bash
 # Установка Let's Encrypt (рекомендуется)
 sudo apt install certbot
-sudo certbot certonly --standalone -d yourdomain.com
+sudo certbot certonly --standalone -d --help
 
 # Или используйте самоподписанный сертификат для тестирования
 openssl req -x509 -newkey rsa:4096 -keyout ssl/private.key -out ssl/cert.pem -days 365 -nodes
@@ -62,7 +62,7 @@ openssl req -x509 -newkey rsa:4096 -keyout ssl/private.key -out ssl/cert.pem -da
 ```nginx
 server {
     listen 443 ssl;
-    server_name yourdomain.com;
+    server_name --help;
     
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/private.key;
@@ -99,10 +99,10 @@ CHANNEL_INVITE_LINK=https://t.me/+gstVWYW2Kgo2OGYy
 PRODAMUS_SHOP_ID=dashastar
 PRODAMUS_SECRET_KEY=b2f9e8a399225271521dfe88a277a7371cb8c2cebfeaa6f0276ba81fcc303c93
 PRODAMUS_DEMO_MODE=true
-PRODAMUS_WEBHOOK_URL=https://yourdomain.com/webhook/prodamus
+PRODAMUS_WEBHOOK_URL=https://--help/webhook/prodamus
 
 # Webhook Configuration
-WEBHOOK_URL=https://yourdomain.com/webhook/telegram
+WEBHOOK_URL=https://--help/webhook/telegram
 FLASK_HOST=0.0.0.0
 FLASK_PORT=5000
 DEBUG=false
@@ -118,7 +118,7 @@ python3 start_webhook.py
 ### 3. Настройка в панели Prodamus
 1. Войдите в панель управления Prodamus
 2. Перейдите в раздел "Настройки"
-3. Установите webhook URL: `https://yourdomain.com/webhook/prodamus`
+3. Установите webhook URL: `https://--help/webhook/prodamus`
 4. Включите демо-режим для тестирования
 
 ## 🧪 Тестирование
@@ -126,10 +126,10 @@ python3 start_webhook.py
 ### 1. Проверка webhook
 ```bash
 # Проверка health check
-curl https://yourdomain.com/health
+curl https://--help/health
 
 # Тест webhook Prodamus
-curl -X POST https://yourdomain.com/webhook/prodamus \
+curl -X POST https://--help/webhook/prodamus \
   -H "Content-Type: application/json" \
   -d '{"test": "data"}'
 ```
