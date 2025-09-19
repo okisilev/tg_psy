@@ -77,16 +77,26 @@ def handle_successful_payment(order_id: str, amount: int, webhook_data: dict):
         
         logger.info(f"Подписка активирована для пользователя {user_id} (username: {username})")
         
-        # Уведомляем администратора о новом платеже
+        # Активируем подписку через бота
         try:
+            import asyncio
             from bot import WomenClubBot
+            
             bot = WomenClubBot()
-            bot.notify_admin_payment(user_id, username, amount, subscription.expires_at if subscription else None)
+            
+            # Запускаем активацию подписки в новом event loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            try:
+                # Активируем подписку (добавляем в канал, отправляем уведомления)
+                loop.run_until_complete(bot.activate_subscription(user_id, order_id, amount))
+                logger.info(f"✅ Подписка активирована для пользователя {user_id}")
+            finally:
+                loop.close()
+                
         except Exception as e:
-            logger.error(f"Ошибка уведомления администратора: {e}")
-        
-        # Здесь должна быть логика уведомления пользователя через бота
-        # В реальном проекте это делается через бота
+            logger.error(f"Ошибка активации подписки: {e}")
         
     except Exception as e:
         logger.error(f"Ошибка обработки успешного платежа: {e}")

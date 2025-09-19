@@ -42,7 +42,7 @@ WHATSAPP_NUMBER = os.getenv('WHATSAPP_NUMBER', '+79149425115')  # Номер Wha
 DATABASE_PATH = 'women_club.db'
 
 # Subscription Settings
-SUBSCRIPTION_PRICE = 1500  # Цена подписки в копейках (15 рублей)
+SUBSCRIPTION_PRICE = 5000  # Цена подписки в копейках (50 рублей)
 SUBSCRIPTION_DURATION_DAYS = 30  # Длительность подписки в днях
 REMINDER_DAYS_BEFORE = 3  # За сколько дней напоминать о продлении
 
