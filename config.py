@@ -13,18 +13,18 @@ ADMIN_CHAT_ID = os.getenv('ADMIN_CHAT_ID')  # ID главного админис
 ADMIN_IDS = os.getenv('ADMIN_IDS', '').split(',') if os.getenv('ADMIN_IDS') else []  # Список ID администраторов
 
 # Webhook Configuration
-WEBHOOK_URL = os.getenv('WEBHOOK_URL', 'https://82.147.71.244/webhook/telegram')  # URL для Telegram webhook
+WEBHOOK_URL = os.getenv('WEBHOOK_URL', 'http://82.147.71.244/webhook/telegram')  # URL для Telegram webhook
 WEBHOOK_PORT = int(os.getenv('WEBHOOK_PORT', '8443'))
 WEBHOOK_LISTEN = os.getenv('WEBHOOK_LISTEN', '0.0.0.0')
 #WEBHOOK_SSL_CERT = os.getenv('WEBHOOK_SSL_CERT', './ssl/cert.pem')
 #WEBHOOK_SSL_PRIV = os.getenv('WEBHOOK_SSL_PRIV', './ssl/private.key')
 
 # Prodamus Webhook Configuration
-PRODAMUS_WEBHOOK_URL = os.getenv('PRODAMUS_WEBHOOK_URL', 'http://82.147.71.224:5000/sales/prodamus')  # URL для Prodamus webhook (HTTP для тестирования)
+PRODAMUS_WEBHOOK_URL = os.getenv('PRODAMUS_WEBHOOK_URL', 'http://82.147.71.224:5001/sales/prodamus')  # URL для Prodamus webhook (HTTP для тестирования)
 
 # Server Configuration
 FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
-FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
+FLASK_PORT = int(os.getenv('FLASK_PORT', '5001'))
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 # Продамус Configuration

@@ -80,9 +80,15 @@ class ProdаmusAPI:
     def verify_webhook(self, data: Dict, signature: str) -> bool:
         """Проверка подписи webhook от Продамус"""
         try:
-            # Создаем строку для проверки подписи
-            sign_data = f"{data.get('shop_id')}{data.get('amount')}{data.get('order_id')}{data.get('currency')}{data.get('status')}{self.secret_key}"
+            # Создаем строку для проверки подписи на основе данных от Prodamus
+            # Формат: shop_id + order_id + sum + currency + payment_status + secret_key
+            sign_data = f"{self.shop_id}{data.get('order_id', '')}{data.get('sum', '')}{data.get('currency', '')}{data.get('payment_status', '')}{self.secret_key}"
             expected_signature = self.generate_signature(sign_data)
+            
+            print(f"Проверка подписи:")
+            print(f"  Данные для подписи: {sign_data}")
+            print(f"  Полученная подпись: {signature}")
+            print(f"  Ожидаемая подпись: {expected_signature}")
             
             return hmac.compare_digest(signature, expected_signature)
         except Exception as e:
