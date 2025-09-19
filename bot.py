@@ -142,20 +142,37 @@ class WomenClubBot:
             # Платеж успешен
             await self.activate_subscription(user_id, payment_id, payment_status['amount'])
         else:
-            # Платеж еще не прошел
+            # Платеж еще не прошел - добавляем время проверки для уникальности
+            import time
+            current_time = time.strftime("%H:%M:%S")
+            
             keyboard = [
                 [InlineKeyboardButton("🔄 Проверить снова", callback_data=f"check_payment_{payment_id}")]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await query.edit_message_text(
-                "⏳ Платеж еще не поступил.\n\nПопробуйте проверить через несколько минут.",
-                reply_markup=reply_markup
-            )
+            # Добавляем время проверки для избежания ошибки "Message is not modified"
+            message_text = f"⏳ Платеж еще не поступил.\n\nПопробуйте проверить через несколько минут.\n\n🕐 Последняя проверка: {current_time}"
+            
+            try:
+                await query.edit_message_text(
+                    message_text,
+                    reply_markup=reply_markup
+                )
+            except Exception as e:
+                # Если сообщение не изменилось, просто отвечаем на callback
+                print(f"Сообщение не изменилось: {e}")
+                await query.answer("Платеж еще не поступил. Попробуйте позже.")
     
     async def activate_subscription(self, user_id: int, payment_id: str, amount: int):
         """Активация подписки после успешной оплаты"""
         try:
+            # Проверяем, не активирована ли уже подписка
+            existing_subscription = self.db.get_active_subscription(user_id)
+            if existing_subscription:
+                logger.info(f"Подписка для пользователя {user_id} уже активирована")
+                return
+            
             # Создаем подписку
             self.db.create_subscription(user_id, payment_id, amount)
             
@@ -192,6 +209,14 @@ class WomenClubBot:
             
         except Exception as e:
             logger.error(f"Ошибка активации подписки: {e}")
+            # Отправляем сообщение об ошибке пользователю
+            try:
+                await self.send_message_to_user(
+                    user_id,
+                    "❌ Произошла ошибка при активации подписки. Обратитесь к администратору."
+                )
+            except Exception as send_error:
+                logger.error(f"Ошибка отправки сообщения об ошибке: {send_error}")
     
     async def add_user_to_channel(self, user_id: int):
         """Добавление пользователя в канал"""
@@ -218,11 +243,22 @@ class WomenClubBot:
     async def notify_admin_payment(self, user, subscription):
         """Уведомление администратора о новом платеже"""
         try:
+            # Проверяем, что user и subscription не None
+            if not user or not subscription:
+                logger.error("User или subscription не найдены для уведомления администратора")
+                return
+            
+            # Извлекаем данные безопасно
+            username = user[1] if len(user) > 1 and user[1] else 'Не указан'
+            user_id = user[0] if len(user) > 0 else 'Неизвестен'
+            amount = subscription[3] / 100 if len(subscription) > 3 and subscription[3] else 0
+            expiry_date = subscription[5][:10] if len(subscription) > 5 and subscription[5] else 'Неизвестно'
+            
             message = MESSAGES['admin_payment_notification'].format(
-                username=user[1] or 'Не указан',
-                user_id=user[0],
-                amount=subscription[3] / 100,
-                expiry_date=subscription[5][:10]
+                username=username,
+                user_id=user_id,
+                amount=amount,
+                expiry_date=expiry_date
             )
             
             # Отправляем уведомление администратору
@@ -234,6 +270,14 @@ class WomenClubBot:
             
         except Exception as e:
             logger.error(f"❌ Ошибка уведомления администратора: {e}")
+            # Отправляем простое уведомление об ошибке
+            try:
+                await self.channel_manager.bot.send_message(
+                    chat_id=ADMIN_CHAT_ID,
+                    text=f"💰 Новый платеж! Пользователь ID: {user[0] if user else 'Неизвестен'}"
+                )
+            except Exception as send_error:
+                logger.error(f"Ошибка отправки простого уведомления: {send_error}")
     
     async def notify_admin_removal(self, user):
         """Уведомление администратора об удалении пользователя"""
