@@ -24,8 +24,8 @@ def prodamus_webhook():
             logger.error("Пустые данные от webhook")
             return jsonify({'status': 'error', 'message': 'Empty data'}), 400
         
-        # Получаем подпись из заголовков
-        signature = request.headers.get('X-Signature')
+        # Получаем подпись из заголовков (Prodamus использует заголовок 'Sign')
+        signature = request.headers.get('Sign')
         
         if not signature:
             logger.error("Отсутствует подпись в webhook")
@@ -36,17 +36,17 @@ def prodamus_webhook():
             logger.error("Неверная подпись webhook")
             return jsonify({'status': 'error', 'message': 'Invalid signature'}), 400
         
-        # Обрабатываем платеж
+        # Обрабатываем платеж (Prodamus использует другие поля)
         order_id = data.get('order_id')
-        status = data.get('status')
-        amount = data.get('amount')
+        payment_status = data.get('payment_status')
+        amount = int(float(data.get('sum', '0')) * 100)  # Конвертируем в копейки
         
-        logger.info(f"Webhook получен: order_id={order_id}, status={status}, amount={amount}")
+        logger.info(f"Webhook получен: order_id={order_id}, payment_status={payment_status}, amount={amount}")
         
-        if status == 'success':
+        if payment_status == 'success':
             # Платеж успешен
             handle_successful_payment(order_id, amount, data)
-        elif status == 'failed':
+        elif payment_status == 'failed':
             # Платеж не прошел
             handle_failed_payment(order_id, data)
         
@@ -59,12 +59,17 @@ def prodamus_webhook():
 def handle_successful_payment(order_id: str, amount: int, webhook_data: dict):
     """Обработка успешного платежа"""
     try:
-        # Извлекаем user_id из custom_fields
-        custom_fields = webhook_data.get('custom_fields', {})
-        user_id = int(custom_fields.get('user_id'))
-        username = custom_fields.get('username', '')
+        # Извлекаем user_id из order_id (формат: women_club_{user_id}_{timestamp})
+        if order_id.startswith('women_club_'):
+            user_id = int(order_id.split('_')[2])
+        else:
+            logger.error(f"Неверный формат order_id: {order_id}")
+            return
         
-        logger.info(f"Обработка успешного платежа: user_id={user_id}, order_id={order_id}, amount={amount}")
+        # Получаем email для логирования
+        customer_email = webhook_data.get('customer_email', '')
+        
+        logger.info(f"Обработка успешного платежа: user_id={user_id}, order_id={order_id}, amount={amount}, email={customer_email}")
         
         # Обновляем статус платежа в базе данных
         db.add_payment(user_id, order_id, amount, 'success')

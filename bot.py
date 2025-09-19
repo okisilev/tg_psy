@@ -135,12 +135,21 @@ class WomenClubBot:
         payment_id = query.data.replace("check_payment_", "")
         user_id = query.from_user.id
         
-        # Проверяем статус платежа
+        print(f"🔍 Проверка платежа: payment_id={payment_id}, user_id={user_id}")
+        
+        # Проверяем статус платежа через API Prodamus
         payment_status = self.prodamus.get_payment_status(payment_id)
         
-        if payment_status and payment_status.get('status') == 'success':
+        print(f"📊 Статус платежа: {payment_status}")
+        
+        # Проверяем статус в ответе от API Prodamus
+        if payment_status and payment_status.get('status') == 'successful':
             # Платеж успешен
-            await self.activate_subscription(user_id, payment_id, payment_status['amount'])
+            print(f"✅ Платеж успешен! Активируем подписку для пользователя {user_id}")
+            
+            # Получаем сумму из ответа API
+            amount = payment_status.get('amount', 5000)  # По умолчанию 50 рублей
+            await self.activate_subscription(user_id, payment_id, amount)
         else:
             # Платеж еще не прошел - добавляем время проверки для уникальности
             import time

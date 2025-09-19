@@ -96,21 +96,46 @@ class ProdаmusAPI:
             return False
     
     def get_payment_status(self, order_id: str) -> Optional[Dict]:
-        """Получение статуса платежа"""
+        """Получение статуса платежа из API Prodamus"""
         try:
-            url = f"https://secure.payform.ru/status"
-            data = {
+            # Используем API Prodamus для проверки статуса
+            url = "https://secure.payform.ru/status"
+            
+            # Создаем подпись для запроса
+            sign_data = f"{self.shop_id}{order_id}{self.secret_key}"
+            signature = self.generate_signature(sign_data)
+            
+            # Параметры запроса
+            params = {
                 'shop_id': self.shop_id,
                 'order_id': order_id,
-                'signature': self.generate_signature(f"{self.shop_id}{order_id}{self.secret_key}")
+                'signature': signature
             }
             
-            response = requests.post(url, json=data, timeout=30)
+            print(f"🔍 Проверка статуса платежа через API Prodamus:")
+            print(f"   - URL: {url}")
+            print(f"   - Order ID: {order_id}")
+            print(f"   - Shop ID: {self.shop_id}")
+            print(f"   - Signature: {signature}")
+            
+            # Отправляем GET запрос
+            response = requests.get(url, params=params, timeout=30)
+            
+            print(f"   - Response status: {response.status_code}")
+            print(f"   - Response text: {response.text}")
             
             if response.status_code == 200:
-                return response.json()
-            
-            return None
+                try:
+                    data = response.json()
+                    print(f"   - API Response: {data}")
+                    return data
+                except ValueError:
+                    # Если ответ не JSON, возвращаем None
+                    print(f"   - Неверный формат ответа: {response.text}")
+                    return None
+            else:
+                print(f"   - Ошибка API: {response.status_code}")
+                return None
             
         except Exception as e:
             print(f"Ошибка получения статуса платежа: {e}")
