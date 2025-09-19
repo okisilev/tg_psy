@@ -20,11 +20,11 @@ WEBHOOK_LISTEN = os.getenv('WEBHOOK_LISTEN', '0.0.0.0')
 #WEBHOOK_SSL_PRIV = os.getenv('WEBHOOK_SSL_PRIV', './ssl/private.key')
 
 # Prodamus Webhook Configuration
-PRODAMUS_WEBHOOK_URL = os.getenv('PRODAMUS_WEBHOOK_URL', 'http://82.147.71.224:5001/sales/prodamus')  # URL для Prodamus webhook (HTTP для тестирования)
+PRODAMUS_WEBHOOK_URL = os.getenv('PRODAMUS_WEBHOOK_URL', 'http://82.147.71.224:5000/sales/prodamus')  # URL для Prodamus webhook (HTTP для тестирования)
 
 # Server Configuration
 FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
-FLASK_PORT = int(os.getenv('FLASK_PORT', '5001'))
+FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 # Продамус Configuration
