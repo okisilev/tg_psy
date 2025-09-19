@@ -13,6 +13,7 @@ db = Database()
 prodamus = ProdаmusAPI()
 
 @app.route('/webhook/prodamus', methods=['POST'])
+@app.route('/sales/prodamus', methods=['POST'])  # Дополнительный маршрут для Prodamus
 def prodamus_webhook():
     """Обработчик webhook от Продамус"""
     try:
