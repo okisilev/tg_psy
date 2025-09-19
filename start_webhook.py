@@ -56,7 +56,8 @@ def start_webhook_server():
     
     try:
         # Импортируем и запускаем webhook
-        from webhook import app, FLASK_HOST, FLASK_PORT
+        from webhook import app
+        from config import FLASK_HOST, FLASK_PORT
         
         print(f"🌐 Сервер запущен на {FLASK_HOST}:{FLASK_PORT}")
         print(f"📡 Webhook URL: http://{FLASK_HOST}:{FLASK_PORT}/webhook/prodamus")

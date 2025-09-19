@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from database import Database
 from prodamus import ProdаmusAPI
-from config import PRODAMUS_SECRET_KEY
+from config import PRODAMUS_SECRET_KEY, FLASK_HOST, FLASK_PORT
 
 app = Flask(__name__)
 logger = logging.getLogger(__name__)
