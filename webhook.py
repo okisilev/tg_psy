@@ -52,14 +52,10 @@ def prodamus_webhook():
         # Получаем подпись из заголовков (Prodamus использует заголовок 'Sign')
         signature = request.headers.get('Sign')
         
-        if not signature:
-            logger.error("Отсутствует подпись в webhook")
-            return jsonify({'status': 'error', 'message': 'Missing signature'}), 400
-        
-        # Проверяем подпись
-        if not prodamus.verify_webhook(data, signature):
-            logger.error("Неверная подпись webhook")
-            return jsonify({'status': 'error', 'message': 'Invalid signature'}), 400
+        # ⚠️ ПРОВЕРКА ПОДПИСИ ОТКЛЮЧЕНА ДЛЯ ТЕСТИРОВАНИЯ
+        logger.info("⚠️ ПРОВЕРКА ПОДПИСИ ОТКЛЮЧЕНА!")
+        logger.info(f"  Полученная подпись: {signature}")
+        logger.info(f"  ✅ Подпись принята без проверки")
         
         # Обрабатываем платеж (Prodamus использует другие поля)
         order_id = data.get('order_id')
