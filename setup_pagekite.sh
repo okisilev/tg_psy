@@ -8,12 +8,15 @@ echo "=" * 50
 
 # 1. Установка PageKite
 echo "📦 Установка PageKite..."
-pip install pagekite
+
+# Скачиваем PageKite
+wget https://pagekite.net/pk/pagekite.py
+chmod +x pagekite.py
 
 if [ $? -eq 0 ]; then
-    echo "   ✅ PageKite установлен успешно"
+    echo "   ✅ PageKite скачан успешно"
 else
-    echo "   ❌ Ошибка установки PageKite"
+    echo "   ❌ Ошибка скачивания PageKite"
     exit 1
 fi
 
@@ -74,10 +77,10 @@ fi
 echo "🌐 Запуск PageKite..."
 echo "   - Домен: dashastar.pagekite.me"
 echo "   - Порт: 5000"
-echo "   - Команда: pagekite.py 5000 dashastar.pagekite.me"
+echo "   - Команда: ./pagekite.py 5000 dashastar.pagekite.me"
 
 # Запускаем PageKite в фоне
-pagekite.py 5000 dashastar.pagekite.me &
+./pagekite.py 5000 dashastar.pagekite.me &
 
 # 9. Ожидание запуска PageKite
 echo "⏳ Ожидание запуска PageKite..."
