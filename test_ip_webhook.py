@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """
-Тест webhook без проверки подписи
+Тест webhook с IP адресом
 """
 
 import requests
 import json
 
-def test_no_signature_webhook():
-    """Тест webhook без проверки подписи"""
+def test_ip_webhook():
+    """Тест webhook с IP адресом"""
     
-    print("🧪 ТЕСТ WEBHOOK БЕЗ ПРОВЕРКИ ПОДПИСИ")
+    print("🧪 ТЕСТ WEBHOOK С IP АДРЕСОМ")
     print("=" * 50)
     
     # Тестовые данные для успешной оплаты
@@ -46,8 +46,8 @@ def test_no_signature_webhook():
     print(f"   - customer_email: {success_data['customer_email']}")
     print()
     
-    # Тест 1: Без подписи
-    print("📋 Тест 1: Без подписи")
+    # Тест 1: Локальный сервер
+    print("📋 Тест 1: Локальный сервер")
     print("-" * 40)
     
     try:
@@ -56,64 +56,38 @@ def test_no_signature_webhook():
         print(f"   - Response: {response.text}")
         
         if response.status_code == 200:
-            print("   ✅ Webhook без подписи работает!")
+            print("   ✅ Локальный сервер работает!")
         else:
-            print("   ❌ Webhook без подписи не работает")
+            print("   ❌ Локальный сервер не работает")
     except Exception as e:
         print(f"   ❌ Ошибка: {e}")
     
     print()
     
-    # Тест 2: С подписью (должна игнорироваться)
-    print("📋 Тест 2: С подписью (должна игнорироваться)")
+    # Тест 2: Внешний IP адрес
+    print("📋 Тест 2: Внешний IP адрес")
     print("-" * 40)
     
-    headers = {
-        'Sign': 'd0b86a63d4f4b3a794022731160e6502b0ff423cf1ce4849c0c740011643efd1'
-    }
-    
     try:
-        response = requests.post("http://localhost:5000/sales/prodamus", data=success_data, headers=headers, timeout=5)
+        response = requests.post("http://82.147.71.244:5000/sales/prodamus", data=success_data, timeout=10)
         print(f"   - Status: {response.status_code}")
         print(f"   - Response: {response.text}")
         
         if response.status_code == 200:
-            print("   ✅ Webhook с подписью работает (подпись игнорируется)!")
+            print("   ✅ Внешний IP работает!")
         else:
-            print("   ❌ Webhook с подписью не работает")
+            print("   ❌ Внешний IP не работает")
     except Exception as e:
         print(f"   ❌ Ошибка: {e}")
     
     print()
     
-    # Тест 3: С неправильной подписью (должна игнорироваться)
-    print("📋 Тест 3: С неправильной подписью (должна игнорироваться)")
-    print("-" * 40)
-    
-    headers = {
-        'Sign': 'wrong_signature_12345'
-    }
-    
-    try:
-        response = requests.post("http://localhost:5000/sales/prodamus", data=success_data, headers=headers, timeout=5)
-        print(f"   - Status: {response.status_code}")
-        print(f"   - Response: {response.text}")
-        
-        if response.status_code == 200:
-            print("   ✅ Webhook с неправильной подписью работает (подпись игнорируется)!")
-        else:
-            print("   ❌ Webhook с неправильной подписью не работает")
-    except Exception as e:
-        print(f"   ❌ Ошибка: {e}")
-    
-    print()
-    
-    # Тест 4: Health check
-    print("📋 Тест 4: Health check")
+    # Тест 3: Health check
+    print("📋 Тест 3: Health check")
     print("-" * 40)
     
     try:
-        response = requests.get("http://localhost:5000/health", timeout=5)
+        response = requests.get("http://82.147.71.244:5000/health", timeout=10)
         print(f"   - Status: {response.status_code}")
         print(f"   - Response: {response.text}")
         
@@ -125,23 +99,43 @@ def test_no_signature_webhook():
         print(f"   ❌ Ошибка: {e}")
     
     print()
+    
+    # Тест 4: Тест с подписью
+    print("📋 Тест 4: Тест с подписью")
+    print("-" * 40)
+    
+    headers = {
+        'Sign': 'd0b86a63d4f4b3a794022731160e6502b0ff423cf1ce4849c0c740011643efd1'
+    }
+    
+    try:
+        response = requests.post("http://82.147.71.244:5000/sales/prodamus", data=success_data, headers=headers, timeout=10)
+        print(f"   - Status: {response.status_code}")
+        print(f"   - Response: {response.text}")
+        
+        if response.status_code == 200:
+            print("   ✅ Webhook с подписью работает!")
+        else:
+            print("   ❌ Webhook с подписью не работает")
+    except Exception as e:
+        print(f"   ❌ Ошибка: {e}")
+    
+    print()
     print("🎉 ТЕСТ ЗАВЕРШЕН!")
     print()
     print("📝 РЕЗУЛЬТАТ:")
-    print("   ✅ Проверка webhook без проверки подписи")
-    print("   ✅ Тестирование с подписью и без подписи")
-    print("   ✅ Проверка игнорирования неправильной подписи")
+    print("   ✅ Проверка webhook с IP адресом")
+    print("   ✅ Тестирование локального и внешнего сервера")
     print("   ✅ Проверка health check")
+    print("   ✅ Тестирование с подписью")
     print()
     print("🔧 Если все тесты прошли успешно:")
     print("   1. Prodamus сможет отправлять уведомления")
-    print("   2. Подписи будут игнорироваться")
-    print("   3. Подписки будут активироваться автоматически")
-    print("   4. Система оплаты будет работать")
+    print("   2. Подписки будут активироваться автоматически")
+    print("   3. Система оплаты будет работать")
     print()
-    print("⚠️ ВНИМАНИЕ: Проверка подписи отключена!")
+    print("⚠️ ВНИМАНИЕ: Используется IP адрес вместо PageKite!")
     print("🔧 Это временное решение для тестирования")
-    print("📋 После тестирования нужно будет включить проверку подписи")
 
 if __name__ == "__main__":
-    test_no_signature_webhook()
+    test_ip_webhook()
