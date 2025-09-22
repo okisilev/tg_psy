@@ -1,7 +1,11 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# Попытка загрузить переменные из .env файла
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    print("⚠️ python-dotenv не установлен. Используются переменные окружения системы.")
 
 # Telegram Bot Configuration
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -9,14 +13,17 @@ ADMIN_CHAT_ID = os.getenv('ADMIN_CHAT_ID')  # ID главного админис
 ADMIN_IDS = os.getenv('ADMIN_IDS', '').split(',') if os.getenv('ADMIN_IDS') else []  # Список ID администраторов
 
 # Webhook Configuration
-WEBHOOK_URL = os.getenv('WEBHOOK_URL')  # https://yourdomain.com/webhook/telegram
+WEBHOOK_URL = os.getenv('WEBHOOK_URL', 'https://dashastar.pagekite.me/webhook/telegram')  # URL для Telegram webhook (PageKite)
 WEBHOOK_PORT = int(os.getenv('WEBHOOK_PORT', '8443'))
 WEBHOOK_LISTEN = os.getenv('WEBHOOK_LISTEN', '0.0.0.0')
-WEBHOOK_SSL_CERT = os.getenv('WEBHOOK_SSL_CERT', './ssl/cert.pem')
-WEBHOOK_SSL_PRIV = os.getenv('WEBHOOK_SSL_PRIV', './ssl/private.key')
+#WEBHOOK_SSL_CERT = os.getenv('WEBHOOK_SSL_CERT', './ssl/cert.pem')
+#WEBHOOK_SSL_PRIV = os.getenv('WEBHOOK_SSL_PRIV', './ssl/private.key')
+
+# Prodamus Webhook Configuration
+PRODAMUS_WEBHOOK_URL = os.getenv('PRODAMUS_WEBHOOK_URL', 'https://dashastar.pagekite.me/sales/prodamus')  # URL для Prodamus webhook (PageKite)
 
 # Server Configuration
-FLASK_HOST = os.getenv('FLASK_HOST', '127.0.0.1')
+FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
 FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
@@ -38,7 +45,7 @@ WHATSAPP_NUMBER = os.getenv('WHATSAPP_NUMBER', '+79149425115')  # Номер Wha
 DATABASE_PATH = 'women_club.db'
 
 # Subscription Settings
-SUBSCRIPTION_PRICE = 1500  # Цена подписки в копейках (15 рублей)
+SUBSCRIPTION_PRICE = 5000  # Цена подписки в копейках (50 рублей)
 SUBSCRIPTION_DURATION_DAYS = 30  # Длительность подписки в днях
 REMINDER_DAYS_BEFORE = 3  # За сколько дней напоминать о продлении
 

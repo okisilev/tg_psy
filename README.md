@@ -41,7 +41,7 @@ cp env_example.txt .env
 1. Зарегистрируйтесь в системе Продамус
 2. Создайте магазин
 3. Получите Shop ID и Secret Key
-4. Настройте webhook URL: `https://yourdomain.com/webhook/prodamus`
+4. Настройте webhook URL: `https://--help/webhook/prodamus`
 
 ### 4. Настройка Telegram канала
 

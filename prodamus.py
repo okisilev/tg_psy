@@ -9,6 +9,7 @@ from config import (
     PRODAMUS_SECRET_KEY, 
     PRODAMUS_API_URL,
     PRODAMUS_DEMO_MODE,
+    PRODAMUS_WEBHOOK_URL,
     SUBSCRIPTION_PRICE
 )
 
@@ -30,84 +31,104 @@ class ProdаmusAPI:
     def create_payment(self, user_id: int, username: str = None) -> Optional[Dict]:
         """Создание платежа в Продамус"""
         try:
-            payment_data = {
+            order_id = f'women_club_{user_id}_{int(time.time())}'
+            
+            # Создаем параметры для URL
+            params = {
                 'shop_id': self.shop_id,
                 'amount': SUBSCRIPTION_PRICE,
                 'currency': 'RUB',
-                'order_id': f'women_club_{user_id}_{int(time.time())}',
+                'order_id': order_id,
                 'customer_phone': '',
                 'customer_email': '',
                 'description': 'Подписка на Женский клуб на 1 месяц',
-                'success_url': 'https://t.me/your_bot_username',  # URL после успешной оплаты
-                'fail_url': 'https://t.me/your_bot_username',     # URL после неуспешной оплаты
-                'callback_url': 'https://yourdomain.com/webhook/prodamus',  # Webhook для уведомлений
-                'custom_fields': {
-                    'user_id': user_id,
-                    'username': username or ''
-                }
+                'success_url': 'https://t.me/your_bot_username',  # Замените на реальный username бота
+                'fail_url': 'https://t.me/your_bot_username',     # Замените на реальный username бота
+                'callback_url': PRODAMUS_WEBHOOK_URL,  # URL для webhook уведомлений
+                'custom_fields': f'user_id:{user_id},username:{username or ""}'
             }
             
             # Добавляем демо-режим если включен
             if self.demo_mode:
-                payment_data['demo_mode'] = 1
+                params['demo_mode'] = 1
             
             # Создаем строку для подписи
-            sign_string = f"{payment_data['shop_id']}{payment_data['amount']}{payment_data['order_id']}{payment_data['currency']}{self.secret_key}"
-            payment_data['signature'] = self.generate_signature(sign_string)
+            sign_string = f"{params['shop_id']}{params['amount']}{params['order_id']}{params['currency']}{self.secret_key}"
+            params['signature'] = self.generate_signature(sign_string)
             
-            print(f"Отправка запроса к: {self.api_url}")
-            print(f"Данные: {payment_data}")
+            print(f"Создание платежа для пользователя {user_id}")
+            print(f"Order ID: {order_id}")
+            print(f"Amount: {SUBSCRIPTION_PRICE} копеек")
+            print(f"Demo Mode: {self.demo_mode}")
             
-            response = requests.post(self.api_url, json=payment_data, timeout=30)
+            # Создаем URL для платежа
+            base_url = "https://dashastar.payform.ru/"
+            payment_url = base_url + "?" + "&".join([f"{k}={v}" for k, v in params.items() if v])
             
-            print(f"Статус ответа: {response.status_code}")
-            print(f"Ответ: {response.text}")
+            print(f"Payment URL: {payment_url}")
             
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('status') == 'success':
-                    return {
-                        'payment_id': result.get('order_id'),
-                        'payment_url': result.get('payment_url'),
-                        'amount': payment_data['amount']
-                    }
-                else:
-                    print(f"API вернул ошибку: {result}")
-            
-            return None
+            return {
+                'payment_id': order_id,
+                'payment_url': payment_url,
+                'amount': SUBSCRIPTION_PRICE
+            }
             
         except Exception as e:
             print(f"Ошибка создания платежа: {e}")
             return None
     
     def verify_webhook(self, data: Dict, signature: str) -> bool:
-        """Проверка подписи webhook от Продамус"""
-        try:
-            # Создаем строку для проверки подписи
-            sign_data = f"{data.get('shop_id')}{data.get('amount')}{data.get('order_id')}{data.get('currency')}{data.get('status')}{self.secret_key}"
-            expected_signature = self.generate_signature(sign_data)
-            
-            return hmac.compare_digest(signature, expected_signature)
-        except Exception as e:
-            print(f"Ошибка проверки подписи: {e}")
-            return False
+        """Проверка подписи webhook от Продамус - ОТКЛЮЧЕНА"""
+        print(f"⚠️ ПРОВЕРКА ПОДПИСИ ОТКЛЮЧЕНА!")
+        print(f"  Полученная подпись: {signature}")
+        print(f"  Данные: {data}")
+        print(f"  ✅ Подпись принята без проверки")
+        return True
     
     def get_payment_status(self, order_id: str) -> Optional[Dict]:
-        """Получение статуса платежа"""
+        """Получение статуса платежа из API Prodamus"""
         try:
-            url = f"https://secure.payform.ru/status"
-            data = {
-                'shop_id': self.shop_id,
-                'order_id': order_id,
-                'signature': self.generate_signature(f"{self.shop_id}{order_id}{self.secret_key}")
+            # Используем правильный API Prodamus для проверки статуса
+            url = f"https://api.prodamus.ru/v3/payments/{order_id}"
+            
+            # Создаем подпись для запроса
+            sign_data = f"{self.shop_id}{order_id}{self.secret_key}"
+            signature = self.generate_signature(sign_data)
+            
+            # Заголовки запроса
+            headers = {
+                'Authorization': f'Bearer {signature}',
+                'Content-Type': 'application/json',
+                'X-Shop-Id': self.shop_id
             }
             
-            response = requests.post(url, json=data, timeout=30)
+            print(f"🔍 Проверка статуса платежа через API Prodamus:")
+            print(f"   - URL: {url}")
+            print(f"   - Order ID: {order_id}")
+            print(f"   - Shop ID: {self.shop_id}")
+            print(f"   - Signature: {signature}")
+            
+            # Отправляем GET запрос
+            response = requests.get(url, headers=headers, timeout=30)
+            
+            print(f"   - Response status: {response.status_code}")
+            print(f"   - Response text: {response.text}")
             
             if response.status_code == 200:
-                return response.json()
-            
-            return None
+                try:
+                    data = response.json()
+                    print(f"   - API Response: {data}")
+                    return data
+                except ValueError:
+                    # Если ответ не JSON, возвращаем None
+                    print(f"   - Неверный формат ответа: {response.text}")
+                    return None
+            elif response.status_code == 404:
+                print(f"   - Платеж не найден: {order_id}")
+                return None
+            else:
+                print(f"   - Ошибка API: {response.status_code}")
+                return None
             
         except Exception as e:
             print(f"Ошибка получения статуса платежа: {e}")

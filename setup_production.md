@@ -66,7 +66,7 @@ sudo nano .env
 ```bash
 BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
 ADMIN_CHAT_ID=123456789
-WEBHOOK_URL=https://yourdomain.com/webhook/telegram
+WEBHOOK_URL=https://--help/webhook/telegram
 PRODAMUS_SHOP_ID=your_shop_id
 PRODAMUS_SECRET_KEY=your_secret_key
 CHANNEL_ID=-1001234567890
@@ -76,7 +76,7 @@ CHANNEL_USERNAME=@your_channel
 ### Шаг 4: Настройка SSL сертификата
 ```bash
 # Получите SSL сертификат от Let's Encrypt
-sudo certbot --nginx -d yourdomain.com
+sudo certbot --nginx -d --help
 
 # Настройте автообновление
 sudo crontab -e
@@ -91,7 +91,7 @@ sudo cp nginx_config.conf /etc/nginx/sites-available/telegram_bot
 
 # Отредактируйте домен в конфигурации
 sudo nano /etc/nginx/sites-available/telegram_bot
-# Замените yourdomain.com на ваш реальный домен
+# Замените --help на ваш реальный домен
 
 # Активируйте сайт
 sudo ln -s /etc/nginx/sites-available/telegram_bot /etc/nginx/sites-enabled/
@@ -123,7 +123,7 @@ sudo ./bot_manager.sh status
 sudo ./bot_manager.sh health
 
 # Проверьте webhook
-curl https://yourdomain.com/health
+curl https://--help/health
 ```
 
 ## 🔧 Управление ботом:
@@ -161,8 +161,8 @@ sudo ./bot_manager.sh backup
 
 ## 📊 Мониторинг:
 
-- **Health check**: `https://yourdomain.com/health`
-- **Статус бота**: `https://yourdomain.com/status`
+- **Health check**: `https://--help/health`
+- **Статус бота**: `https://--help/status`
 - **Логи**: `sudo journalctl -u telegram_bot -f`
 
 ## 🔄 Обновления:

@@ -43,7 +43,7 @@
 - **Secret Key**: `b2f9e8a399225271521dfe88a277a7371cb8c2cebfeaa6f0276ba81fcc303c93`
 - **API URL**: `https://dashastar.payform.ru/init_payment`
 - **Demo Mode**: Включен
-- **Webhook URL**: `https://yourdomain.com/webhook/prodamus`
+- **Webhook URL**: `https://--help/webhook/prodamus`
 
 ### Тестовые карты для демо-режима:
 - **МИР**: `2202 2050 0001 2424` (05/35, CVC: 669)
@@ -69,7 +69,7 @@
 
 ### 1. Настройка в панели Prodamus
 - Войти в панель управления Prodamus
-- Настроить webhook URL: `https://yourdomain.com/webhook/prodamus`
+- Настроить webhook URL: `https://--help/webhook/prodamus`
 - Включить демо-режим для тестирования
 - Проверить настройки безопасности
 

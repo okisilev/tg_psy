@@ -11,7 +11,7 @@
 #### Основные параметры:
 - **Секретный ключ**: `b2f9e8a399225271521dfe88a277a7371cb8c2cebfeaa6f0276ba81fcc303c93`
 - **Демо-режим**: Включен по умолчанию для тестирования
-- **Webhook URL**: `https://yourdomain.com/webhook/prodamus`
+- **Webhook URL**: `https://--help/webhook/prodamus`
 
 #### Настройка в панели Prodamus:
 1. Войдите в панель управления Prodamus
@@ -32,7 +32,7 @@ PRODAMUS_DEMO_MODE=true
 SMART_SENDER_API_KEY=your_smart_sender_api_key_here
 
 # Webhook Configuration
-WEBHOOK_URL=https://yourdomain.com/webhook/prodamus
+WEBHOOK_URL=https://--help/webhook/prodamus
 ```
 
 ## 🧪 Тестирование

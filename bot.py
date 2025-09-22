@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import time
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler, 
@@ -96,22 +97,27 @@ class WomenClubBot:
         
         # Создаем платеж в Продамус
         payment = self.prodamus.create_payment(
-            user_id=user_id,
-            username=query.from_user.username
+            order_id=f"women_club_{user_id}_{int(time.time())}",
+            amount=5000,  # 50 рублей в копейках
+            description="Доступ к обучающим материалам",
+            user_id=user_id
         )
         
         if payment:
+            # payment - это URL, а не словарь
+            payment_id = f"women_club_{user_id}_{int(time.time())}"
+            
             # Сохраняем платеж в базу данных
             self.db.add_payment(
                 user_id=user_id,
-                payment_id=payment['payment_id'],
-                amount=payment['amount'],
+                payment_id=payment_id,
+                amount=5000,  # 50 рублей в копейках
                 status='pending'
             )
             
             keyboard = [
-                [InlineKeyboardButton("💳 Оплатить", url=payment['payment_url'])],
-                [InlineKeyboardButton("🔄 Проверить оплату", callback_data=f"check_payment_{payment['payment_id']}")]
+                [InlineKeyboardButton("💳 Оплатить", url=payment)],
+                [InlineKeyboardButton("🔄 Проверить оплату", callback_data=f"check_payment_{payment_id}")]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
@@ -126,6 +132,7 @@ class WomenClubBot:
             await query.edit_message_text(
                 "❌ Ошибка создания платежа. Попробуйте позже или обратитесь к администратору."
             )
+
     
     async def check_payment_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик проверки оплаты"""
@@ -135,27 +142,102 @@ class WomenClubBot:
         payment_id = query.data.replace("check_payment_", "")
         user_id = query.from_user.id
         
-        # Проверяем статус платежа
-        payment_status = self.prodamus.get_payment_status(payment_id)
+        print(f"🔍 Проверка платежа: payment_id={payment_id}, user_id={user_id}")
         
+
+        # Проверяем статус платежа (сначала в базе данных, потом API)
+        payment_status = self.get_payment_status_alternative(payment_id)
+        
+        print(f"📊 Статус платежа: {payment_status}")
+        
+        # Проверяем статус платежа
         if payment_status and payment_status.get('status') == 'success':
             # Платеж успешен
-            await self.activate_subscription(user_id, payment_id, payment_status['amount'])
+            print(f"✅ Платеж успешен! Активируем подписку для пользователя {user_id}")
+            
+            # Получаем сумму из ответа
+            amount = payment_status.get('amount', 5000)  # По умолчанию 50 рублей
+            await self.activate_subscription(user_id, payment_id, amount)
         else:
-            # Платеж еще не прошел
+            # Платеж еще не прошел - добавляем время проверки для уникальности
+            import time
+            current_time = time.strftime("%H:%M:%S")
+            
             keyboard = [
                 [InlineKeyboardButton("🔄 Проверить снова", callback_data=f"check_payment_{payment_id}")]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await query.edit_message_text(
-                "⏳ Платеж еще не поступил.\n\nПопробуйте проверить через несколько минут.",
-                reply_markup=reply_markup
-            )
+            # Добавляем время проверки для избежания ошибки "Message is not modified"
+            message_text = f"⏳ Платеж еще не поступил.\n\nПопробуйте проверить через несколько минут.\n\n🕐 Последняя проверка: {current_time}"
+            
+            try:
+                await query.edit_message_text(
+                    message_text,
+                    reply_markup=reply_markup
+                )
+            except Exception as e:
+                # Если сообщение не изменилось, просто отвечаем на callback
+                print(f"Сообщение не изменилось: {e}")
+                await query.answer("Платеж еще не поступил. Попробуйте позже.")
     
+    def get_payment_status_alternative(self, order_id: str) -> dict:
+        """Альтернативная проверка статуса платежа"""
+        try:
+            print(f"🔍 Альтернативная проверка статуса платежа: {order_id}")
+            
+            # 1. Проверяем в базе данных (webhook мог уже сохранить статус)
+            cursor = self.db.conn.cursor()
+            cursor.execute('''
+                SELECT user_id, payment_id, amount, status, created_at
+                FROM payments 
+                WHERE payment_id = ?
+            ''', (order_id,))
+            
+            result = cursor.fetchone()
+            
+            if result:
+                user_id, payment_id, amount, status, created_at = result
+                print(f"   ✅ Платеж найден в базе данных: status={status}")
+                return {
+                    'status': status,
+                    'amount': amount,
+                    'user_id': user_id,
+                    'created_at': created_at,
+                    'source': 'database'
+                }
+            
+            # 2. Если не найден в базе, пробуем API Prodamus
+            print(f"   🔍 Платеж не найден в базе, проверяем API Prodamus...")
+            
+            # Пробуем API Prodamus
+            try:
+                api_status = self.prodamus.get_payment_status(order_id)
+                if api_status:
+                    print(f"   ✅ API ответ получен: {api_status}")
+                    return api_status
+                else:
+                    print(f"   ❌ API не вернул данные")
+            except Exception as e:
+                print(f"   ❌ Ошибка API: {e}")
+            
+            # 3. Если API не работает, возвращаем None
+            print(f"   ❌ Платеж не найден ни в базе, ни в API")
+            return None
+            
+        except Exception as e:
+            print(f"Ошибка альтернативной проверки: {e}")
+            return None
+
     async def activate_subscription(self, user_id: int, payment_id: str, amount: int):
         """Активация подписки после успешной оплаты"""
         try:
+            # Проверяем, не активирована ли уже подписка
+            existing_subscription = self.db.get_active_subscription(user_id)
+            if existing_subscription:
+                logger.info(f"Подписка для пользователя {user_id} уже активирована")
+                return
+            
             # Создаем подписку
             self.db.create_subscription(user_id, payment_id, amount)
             
@@ -192,6 +274,14 @@ class WomenClubBot:
             
         except Exception as e:
             logger.error(f"Ошибка активации подписки: {e}")
+            # Отправляем сообщение об ошибке пользователю
+            try:
+                await self.send_message_to_user(
+                    user_id,
+                    "❌ Произошла ошибка при активации подписки. Обратитесь к администратору."
+                )
+            except Exception as send_error:
+                logger.error(f"Ошибка отправки сообщения об ошибке: {send_error}")
     
     async def add_user_to_channel(self, user_id: int):
         """Добавление пользователя в канал"""
@@ -218,11 +308,22 @@ class WomenClubBot:
     async def notify_admin_payment(self, user, subscription):
         """Уведомление администратора о новом платеже"""
         try:
+            # Проверяем, что user и subscription не None
+            if not user or not subscription:
+                logger.error("User или subscription не найдены для уведомления администратора")
+                return
+            
+            # Извлекаем данные безопасно
+            username = user[1] if len(user) > 1 and user[1] else 'Не указан'
+            user_id = user[0] if len(user) > 0 else 'Неизвестен'
+            amount = subscription[3] / 100 if len(subscription) > 3 and subscription[3] else 0
+            expiry_date = subscription[5][:10] if len(subscription) > 5 and subscription[5] else 'Неизвестно'
+            
             message = MESSAGES['admin_payment_notification'].format(
-                username=user[1] or 'Не указан',
-                user_id=user[0],
-                amount=subscription[3] / 100,
-                expiry_date=subscription[5][:10]
+                username=username,
+                user_id=user_id,
+                amount=amount,
+                expiry_date=expiry_date
             )
             
             # Отправляем уведомление администратору
@@ -234,6 +335,14 @@ class WomenClubBot:
             
         except Exception as e:
             logger.error(f"❌ Ошибка уведомления администратора: {e}")
+            # Отправляем простое уведомление об ошибке
+            try:
+                await self.channel_manager.bot.send_message(
+                    chat_id=ADMIN_CHAT_ID,
+                    text=f"💰 Новый платеж! Пользователь ID: {user[0] if user else 'Неизвестен'}"
+                )
+            except Exception as send_error:
+                logger.error(f"Ошибка отправки простого уведомления: {send_error}")
     
     async def notify_admin_removal(self, user):
         """Уведомление администратора об удалении пользователя"""
