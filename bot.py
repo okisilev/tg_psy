@@ -104,17 +104,20 @@ class WomenClubBot:
         )
         
         if payment:
+            # payment - это URL, а не словарь
+            payment_id = f"women_club_{user_id}_{int(time.time())}"
+            
             # Сохраняем платеж в базу данных
             self.db.add_payment(
                 user_id=user_id,
-                payment_id=payment['payment_id'],
-                amount=payment['amount'],
+                payment_id=payment_id,
+                amount=5000,  # 50 рублей в копейках
                 status='pending'
             )
             
             keyboard = [
-                [InlineKeyboardButton("💳 Оплатить", url=payment['payment_url'])],
-                [InlineKeyboardButton("🔄 Проверить оплату", callback_data=f"check_payment_{payment['payment_id']}")]
+                [InlineKeyboardButton("💳 Оплатить", url=payment)],
+                [InlineKeyboardButton("🔄 Проверить оплату", callback_data=f"check_payment_{payment_id}")]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
