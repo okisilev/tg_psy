@@ -132,6 +132,7 @@ class WomenClubBot:
             await query.edit_message_text(
                 "❌ Ошибка создания платежа. Попробуйте позже или обратитесь к администратору."
             )
+
     
     async def check_payment_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обработчик проверки оплаты"""
