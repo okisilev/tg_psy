@@ -1,5 +1,6 @@
 import logging
 import asyncio
+import time
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler, 
@@ -96,8 +97,10 @@ class WomenClubBot:
         
         # Создаем платеж в Продамус
         payment = self.prodamus.create_payment(
-            user_id=user_id,
-            username=query.from_user.username
+            order_id=f"women_club_{user_id}_{int(time.time())}",
+            amount=5000,  # 50 рублей в копейках
+            description="Доступ к обучающим материалам",
+            user_id=user_id
         )
         
         if payment:
