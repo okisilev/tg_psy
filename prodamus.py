@@ -90,7 +90,25 @@ class ProdаmusAPI:
             print(f"  Полученная подпись: {signature}")
             print(f"  Ожидаемая подпись: {expected_signature}")
             
-            return hmac.compare_digest(signature, expected_signature)
+            # Если подписи не совпадают, пробуем альтернативный формат
+            if not hmac.compare_digest(signature, expected_signature):
+                # Альтернативный формат: order_id + sum + currency + payment_status + secret_key
+                alt_sign_data = f"{data.get('order_id', '')}{data.get('sum', '')}{data.get('currency', '')}{data.get('payment_status', '')}{self.secret_key}"
+                alt_signature = self.generate_signature(alt_sign_data)
+                
+                print(f"  Альтернативные данные: {alt_sign_data}")
+                print(f"  Альтернативная подпись: {alt_signature}")
+                
+                if hmac.compare_digest(signature, alt_signature):
+                    print("  ✅ Подпись совпадает с альтернативным форматом")
+                    return True
+                else:
+                    print("  ❌ Подпись не совпадает ни с одним форматом")
+                    return False
+            else:
+                print("  ✅ Подпись совпадает")
+                return True
+                
         except Exception as e:
             print(f"Ошибка проверки подписи: {e}")
             return False
