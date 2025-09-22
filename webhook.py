@@ -17,8 +17,18 @@ prodamus = ProdаmusAPI()
 def prodamus_webhook():
     """Обработчик webhook от Продамус"""
     try:
-        # Получаем данные от Продамус
-        data = request.get_json()
+        # Получаем данные от Продамус (form-data или JSON)
+        if request.is_json:
+            data = request.get_json()
+            logger.info("Получены JSON данные от webhook")
+        else:
+            # Обрабатываем form-data
+            data = request.form.to_dict()
+            logger.info("Получены form-data от webhook")
+        
+        logger.info(f"Данные webhook: {data}")
+        logger.info(f"Content-Type: {request.content_type}")
+        logger.info(f"Заголовки: {dict(request.headers)}")
         
         if not data:
             logger.error("Пустые данные от webhook")
