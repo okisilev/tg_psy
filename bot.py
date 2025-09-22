@@ -137,6 +137,7 @@ class WomenClubBot:
         
         print(f"🔍 Проверка платежа: payment_id={payment_id}, user_id={user_id}")
         
+
         # Проверяем статус платежа (сначала в базе данных, потом API)
         payment_status = self.get_payment_status_alternative(payment_id)
         
