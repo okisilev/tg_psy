@@ -65,11 +65,28 @@ def prodamus_webhook():
         logger.info(f"Webhook получен: order_id={order_id}, payment_status={payment_status}, amount={amount}")
         
         if payment_status == 'success':
-            # Платеж успешен
-            handle_successful_payment(order_id, amount, data)
+            logger.info("Обработка успешного платежа...")
+            try:
+                # Извлекаем user_id из order_id (формат: women_club_{user_id}_{timestamp})
+                if order_id.startswith('women_club_'):
+                    parts = order_id.split('_')
+                    if len(parts) >= 3:
+                        user_id = int(parts[2])
+                        logger.info(f"Извлечен user_id: {user_id}")
+                        
+                        # Активируем подписку
+                        asyncio.run(bot.activate_subscription(user_id, amount))
+                        
+                        logger.info("Подписка активирована успешно")
+                    else:
+                        logger.error("Не удалось извлечь user_id из order_id")
+                else:
+                    logger.error("Неверный формат order_id")
+                    
+            except Exception as e:
+                logger.error(f"Ошибка обработки успешного платежа: {e}")
         elif payment_status == 'failed':
-            # Платеж не прошел
-            handle_failed_payment(order_id, data)
+            logger.info(f"Платеж не прошел: {order_id}")
         
         return jsonify({'status': 'success'})
         
