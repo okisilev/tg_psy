@@ -48,9 +48,9 @@ def test_webhook_form_data():
         'payment_status_description': 'Успешная оплата'
     }
     
-    # Заголовки
+    # Заголовки (используем правильную подпись)
     headers = {
-        'Sign': '666fecb5538ccd8c414a16172ff027e55442cd2b14f9fe7d693f009fd3a8a826'
+        'Sign': 'ed82534dec1405e94f9df13e61efd07acf4703249c37dd96859636fefa7b3b88'
     }
     
     try:
@@ -102,7 +102,7 @@ def test_webhook_form_data():
     # Заголовки для JSON
     json_headers = {
         'Content-Type': 'application/json',
-        'Sign': '666fecb5538ccd8c414a16172ff027e55442cd2b14f9fe7d693f009fd3a8a826'
+        'Sign': 'ed82534dec1405e94f9df13e61efd07acf4703249c37dd96859636fefa7b3b88'
     }
     
     try:

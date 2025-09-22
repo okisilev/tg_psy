@@ -25,6 +25,21 @@ def prodamus_webhook():
             # Обрабатываем form-data
             data = request.form.to_dict()
             logger.info("Получены form-data от webhook")
+            
+            # Обрабатываем массивы в form-data (например, products)
+            if 'products[0][name]' in data:
+                products = []
+                i = 0
+                while f'products[{i}][name]' in data:
+                    product = {
+                        'name': data.get(f'products[{i}][name]', ''),
+                        'price': data.get(f'products[{i}][price]', ''),
+                        'quantity': data.get(f'products[{i}][quantity]', ''),
+                        'sum': data.get(f'products[{i}][sum]', '')
+                    }
+                    products.append(product)
+                    i += 1
+                data['products'] = products
         
         logger.info(f"Данные webhook: {data}")
         logger.info(f"Content-Type: {request.content_type}")
