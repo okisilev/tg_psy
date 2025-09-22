@@ -137,17 +137,17 @@ class WomenClubBot:
         
         print(f"🔍 Проверка платежа: payment_id={payment_id}, user_id={user_id}")
         
-        # Проверяем статус платежа через API Prodamus
-        payment_status = self.prodamus.get_payment_status(payment_id)
+        # Проверяем статус платежа (сначала в базе данных, потом API)
+        payment_status = self.get_payment_status_alternative(payment_id)
         
         print(f"📊 Статус платежа: {payment_status}")
         
-        # Проверяем статус в ответе от API Prodamus
-        if payment_status and payment_status.get('status') == 'successful':
+        # Проверяем статус платежа
+        if payment_status and payment_status.get('status') == 'success':
             # Платеж успешен
             print(f"✅ Платеж успешен! Активируем подписку для пользователя {user_id}")
             
-            # Получаем сумму из ответа API
+            # Получаем сумму из ответа
             amount = payment_status.get('amount', 5000)  # По умолчанию 50 рублей
             await self.activate_subscription(user_id, payment_id, amount)
         else:
@@ -173,6 +173,54 @@ class WomenClubBot:
                 print(f"Сообщение не изменилось: {e}")
                 await query.answer("Платеж еще не поступил. Попробуйте позже.")
     
+    def get_payment_status_alternative(self, order_id: str) -> dict:
+        """Альтернативная проверка статуса платежа"""
+        try:
+            print(f"🔍 Альтернативная проверка статуса платежа: {order_id}")
+            
+            # 1. Проверяем в базе данных (webhook мог уже сохранить статус)
+            cursor = self.db.conn.cursor()
+            cursor.execute('''
+                SELECT user_id, payment_id, amount, status, created_at
+                FROM payments 
+                WHERE payment_id = ?
+            ''', (order_id,))
+            
+            result = cursor.fetchone()
+            
+            if result:
+                user_id, payment_id, amount, status, created_at = result
+                print(f"   ✅ Платеж найден в базе данных: status={status}")
+                return {
+                    'status': status,
+                    'amount': amount,
+                    'user_id': user_id,
+                    'created_at': created_at,
+                    'source': 'database'
+                }
+            
+            # 2. Если не найден в базе, пробуем API Prodamus
+            print(f"   🔍 Платеж не найден в базе, проверяем API Prodamus...")
+            
+            # Пробуем API Prodamus
+            try:
+                api_status = self.prodamus.get_payment_status(order_id)
+                if api_status:
+                    print(f"   ✅ API ответ получен: {api_status}")
+                    return api_status
+                else:
+                    print(f"   ❌ API не вернул данные")
+            except Exception as e:
+                print(f"   ❌ Ошибка API: {e}")
+            
+            # 3. Если API не работает, возвращаем None
+            print(f"   ❌ Платеж не найден ни в базе, ни в API")
+            return None
+            
+        except Exception as e:
+            print(f"Ошибка альтернативной проверки: {e}")
+            return None
+
     async def activate_subscription(self, user_id: int, payment_id: str, amount: int):
         """Активация подписки после успешной оплаты"""
         try:

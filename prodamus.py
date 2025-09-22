@@ -98,18 +98,18 @@ class ProdаmusAPI:
     def get_payment_status(self, order_id: str) -> Optional[Dict]:
         """Получение статуса платежа из API Prodamus"""
         try:
-            # Используем API Prodamus для проверки статуса
-            url = "https://secure.payform.ru/status"
+            # Используем правильный API Prodamus для проверки статуса
+            url = f"https://api.prodamus.ru/v3/payments/{order_id}"
             
             # Создаем подпись для запроса
             sign_data = f"{self.shop_id}{order_id}{self.secret_key}"
             signature = self.generate_signature(sign_data)
             
-            # Параметры запроса
-            params = {
-                'shop_id': self.shop_id,
-                'order_id': order_id,
-                'signature': signature
+            # Заголовки запроса
+            headers = {
+                'Authorization': f'Bearer {signature}',
+                'Content-Type': 'application/json',
+                'X-Shop-Id': self.shop_id
             }
             
             print(f"🔍 Проверка статуса платежа через API Prodamus:")
@@ -119,7 +119,7 @@ class ProdаmusAPI:
             print(f"   - Signature: {signature}")
             
             # Отправляем GET запрос
-            response = requests.get(url, params=params, timeout=30)
+            response = requests.get(url, headers=headers, timeout=30)
             
             print(f"   - Response status: {response.status_code}")
             print(f"   - Response text: {response.text}")
@@ -133,6 +133,9 @@ class ProdаmusAPI:
                     # Если ответ не JSON, возвращаем None
                     print(f"   - Неверный формат ответа: {response.text}")
                     return None
+            elif response.status_code == 404:
+                print(f"   - Платеж не найден: {order_id}")
+                return None
             else:
                 print(f"   - Ошибка API: {response.status_code}")
                 return None
