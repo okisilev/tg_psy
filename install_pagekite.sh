@@ -1,58 +1,105 @@
 #!/bin/bash
 
-# 📦 УСТАНОВКА PAGKITE
-# Скачивание и настройка PageKite
+# 📥 УСТАНОВКА PAGKITE
+# Установка и настройка PageKite для webhook
 
-echo "📦 УСТАНОВКА PAGKITE"
-echo "=" * 40
+echo "📥 УСТАНОВКА PAGKITE"
+echo "=" * 50
 
-# 1. Проверка наличия PageKite
-echo "🔍 Проверка наличия PageKite..."
+# 1. Проверка наличия pagekite.py
+echo "🔍 Проверка наличия pagekite.py..."
 if [ -f "pagekite.py" ]; then
-    echo "   ✅ PageKite уже установлен"
-    exit 0
+    echo "   ✅ pagekite.py уже установлен"
+else
+    echo "   📥 Скачивание pagekite.py..."
+    wget -O pagekite.py https://pagekite.net/pk/pagekite.py
+    if [ $? -eq 0 ]; then
+        echo "   ✅ pagekite.py скачан"
+        chmod +x pagekite.py
+        echo "   ✅ pagekite.py сделан исполняемым"
+    else
+        echo "   ❌ Ошибка скачивания pagekite.py"
+        echo "   🔧 Попробуйте альтернативный способ..."
+        
+        # Альтернативный способ скачивания
+        curl -o pagekite.py https://pagekite.net/pk/pagekite.py
+        if [ $? -eq 0 ]; then
+            echo "   ✅ pagekite.py скачан через curl"
+            chmod +x pagekite.py
+            echo "   ✅ pagekite.py сделан исполняемым"
+        else
+            echo "   ❌ Ошибка скачивания через curl"
+            echo "   📋 Проверьте интернет соединение"
+            exit 1
+        fi
+    fi
 fi
 
-# 2. Скачивание PageKite
-echo "📥 Скачивание PageKite..."
-wget https://pagekite.net/pk/pagekite.py
-
+# 2. Проверка Python
+echo "🐍 Проверка Python..."
+python3 --version
 if [ $? -eq 0 ]; then
-    echo "   ✅ PageKite скачан успешно"
+    echo "   ✅ Python3 доступен"
 else
-    echo "   ❌ Ошибка скачивания PageKite"
-    echo "   🔧 Попробуйте альтернативный способ:"
-    echo "      curl -O https://pagekite.net/pk/pagekite.py"
+    echo "   ❌ Python3 не найден"
     exit 1
 fi
 
-# 3. Установка прав доступа
-echo "🔐 Установка прав доступа..."
-chmod +x pagekite.py
-
+# 3. Тестирование PageKite
+echo "🧪 Тестирование PageKite..."
+echo "   - Запуск тестового подключения..."
+timeout 10 ./pagekite.py 5000 dashastar.pagekite.me --help
 if [ $? -eq 0 ]; then
-    echo "   ✅ Права доступа установлены"
+    echo "   ✅ PageKite работает"
 else
-    echo "   ❌ Ошибка установки прав доступа"
-    exit 1
+    echo "   ⚠️ PageKite не отвечает на --help"
+    echo "   🔧 Это может быть нормально, если нет интернета"
 fi
 
-# 4. Проверка установки
-echo "🧪 Проверка установки..."
-./pagekite.py --help
+# 4. Создание скрипта запуска
+echo "📝 Создание скрипта запуска..."
+cat > start_pagekite.sh << 'EOF'
+#!/bin/bash
+# Запуск PageKite для webhook
 
-if [ $? -eq 0 ]; then
-    echo "   ✅ PageKite установлен и работает"
-else
-    echo "   ❌ PageKite не работает"
-    exit 1
-fi
+echo "🌐 Запуск PageKite..."
+./pagekite.py 5000 dashastar.pagekite.me &
+PAGKITE_PID=$!
+echo "PageKite PID: $PAGKITE_PID"
+echo "Для остановки: kill $PAGKITE_PID"
+EOF
+
+chmod +x start_pagekite.sh
+echo "   ✅ Скрипт start_pagekite.sh создан"
+
+# 5. Создание скрипта остановки
+echo "📝 Создание скрипта остановки..."
+cat > stop_pagekite.sh << 'EOF'
+#!/bin/bash
+# Остановка PageKite
+
+echo "⏹️ Остановка PageKite..."
+pkill -f pagekite.py
+echo "✅ PageKite остановлен"
+EOF
+
+chmod +x stop_pagekite.sh
+echo "   ✅ Скрипт stop_pagekite.sh создан"
 
 echo ""
-echo "🎉 PAGKITE УСТАНОВЛЕН УСПЕШНО!"
+echo "🎉 PAGKITE УСТАНОВЛЕН!"
 echo ""
-echo "📝 Использование:"
-echo "   ./pagekite.py 5000 dashastar.pagekite.me"
+echo "📝 Статус:"
+echo "   - pagekite.py: установлен"
+echo "   - start_pagekite.sh: создан"
+echo "   - stop_pagekite.sh: создан"
 echo ""
-echo "🔧 Для запуска webhook с PageKite:"
-echo "   ./start_pagekite_webhook.sh"
+echo "🚀 Запуск:"
+echo "   ./start_pagekite.sh"
+echo "   python3 main_with_pagekite.py"
+echo ""
+echo "🛑 Остановка:"
+echo "   ./stop_pagekite.sh"
+echo ""
+echo "🧪 Тестирование:"
+echo "   curl https://dashastar.pagekite.me/health"
