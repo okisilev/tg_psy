@@ -82,7 +82,7 @@ def handle_prodamus_webhook():
                         logger.info(f"Извлечен user_id: {user_id}")
                         
                         # Активируем подписку
-                        asyncio.run(bot.activate_subscription(user_id, amount))
+                        asyncio.run(bot.activate_subscription(user_id, order_id, amount))
                         
                         logger.info("Подписка активирована успешно")
                     else:
