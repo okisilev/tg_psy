@@ -316,23 +316,6 @@ class Database:
             }
         return None
 
-    def add_subscription(self, user_id: int, payment_id: str, amount: int, start_date, end_date):
-        """Добавить подписку"""
-        cursor = self.conn.cursor()
-        cursor.execute('''
-            INSERT INTO subscriptions (user_id, payment_id, amount, start_date, end_date, is_active)
-            VALUES (?, ?, ?, ?, ?, 1)
-        ''', (user_id, payment_id, amount, start_date, end_date))
-        self.conn.commit()
-        return cursor.lastrowid
-    
-    def update_payment_status(self, payment_id: str, status: str):
-        """Обновить статус платежа"""
-        cursor = self.conn.cursor()
-        cursor.execute('UPDATE payments SET status = ? WHERE payment_id = ?', (status, payment_id))
-        self.conn.commit()
-        return cursor.rowcount > 0
-
     def get_payment_by_contact(self, phone: str = None, email: str = None) -> Optional[dict]:
         """Найти платеж по контактным данным"""
         cursor = self.conn.cursor()
